@@ -15,3 +15,6 @@ if (empty($abbreviation)) {
 }
 $notes = sanitizeInput($_POST['notes']);
 $lead = intval($_POST['lead'] ?? 0);
+$billing_contact_name = sanitizeInput($_POST['billing_contact_name'] ?? '');
+$billing_contact_email = sanitizeInput($_POST['billing_contact_email'] ?? '');
+$billing_cc_emails = sanitizeInput($_POST['billing_cc_emails'] ?? '');

@@ -353,6 +353,39 @@
                                     </div>
                                 </div>
 
+                                <hr>
+
+                                <div class="form-group">
+                                    <label>Billing Contact Name</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fa fa-fw fa-user"></i></span>
+                                        </div>
+                                        <input type="text" class="form-control" name="billing_contact_name" placeholder="Name of billing contact" maxlength="100">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Billing Contact Email</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fa fa-fw fa-envelope"></i></span>
+                                        </div>
+                                        <input type="email" class="form-control" name="billing_contact_email" placeholder="billing@example.com" maxlength="100">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Billing CC Emails</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fa fa-fw fa-copy"></i></span>
+                                        </div>
+                                        <input type="text" class="form-control" name="billing_cc_emails" placeholder="email1@example.com, email2@example.com" maxlength="500">
+                                    </div>
+                                    <small class="text-muted">Comma-separated list of email addresses to CC on invoices</small>
+                                </div>
+
                             </div>
 
                         <?php } ?>
