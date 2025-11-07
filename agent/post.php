@@ -40,7 +40,11 @@ if (!$module && isset($_SERVER['HTTP_REFERER'])) {
 
 foreach (glob("post/*.php") as $user_module) {
     if (!preg_match('/_model\.php$/', basename($user_module))) {
-        require_once $user_module;
+        $handler_module = str_replace('.php', '', basename($user_module));
+        // Only load handler if it matches the determined module
+        if (!$module || $handler_module === $module) {
+            require_once $user_module;
+        }
     }
 }
 
