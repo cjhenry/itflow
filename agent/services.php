@@ -1,224 +1,350 @@
 <?php
 
-// Default Column Sortby Filter
-$sort = "service_name";
+$sort = "service_sort_order";
 $order = "ASC";
 
-// If client_id is in URI then show client Side Bar and client header
-if (isset($_GET['client_id'])) {
-    require_once "includes/inc_all_client.php";
-    $client_query = "AND service_client_id = $client_id";
-    $client_url = "client_id=$client_id&";
-} else {
-    require_once "includes/inc_client_overview_all.php";
-    $client_query = '';
-    $client_url = '';
+require_once "includes/inc_all.php";
+require_once "includes/inc_services.php";
+
+// Permission check
+enforceUserPermission('module_client', 2);
+
+$status_filter = sanitizeInput($_GET['status'] ?? 'Active');
+$category_filter = sanitizeInput($_GET['category'] ?? '');
+$search_query = sanitizeInput($_GET['search'] ?? '');
+
+$where = "WHERE 1=1";
+
+if ($status_filter && $status_filter != 'All') {
+    $where .= " AND service_status = '$status_filter'";
 }
 
-// Perms
-enforceUserPermission('module_support');
-
-if (!$client_url) {
-    // Client Filter
-    if (isset($_GET['client']) & !empty($_GET['client'])) {
-        $client_query = 'AND (service_client_id = ' . intval($_GET['client']) . ')';
-        $client = intval($_GET['client']);
-    } else {
-        // Default - any
-        $client_query = '';
-        $client = '';
-    }
+if ($category_filter) {
+    $where .= " AND service_category = '$category_filter'";
 }
 
-// Overview SQL query
+if ($search_query) {
+    $where .= " AND (service_name LIKE '%$search_query%' OR service_description LIKE '%$search_query%')";
+}
+
 $sql = mysqli_query(
     $mysqli,
-    "SELECT SQL_CALC_FOUND_ROWS * FROM services
-    LEFT JOIN clients ON client_id = service_client_id
-    WHERE (service_name LIKE '%$q%' OR service_description LIKE '%$q%' OR service_category LIKE '%$q%' OR client_name LIKE '%$q%')
-    AND client_archived_at IS NULL
-    $access_permission_query
-    $client_query
-    ORDER BY $sort $order LIMIT $record_from, $record_to"
+    "SELECT SQL_CALC_FOUND_ROWS s.*, 
+            (SELECT COUNT(DISTINCT client_id) FROM client_services WHERE service_id = s.service_id) as client_count,
+            (SELECT COUNT(DISTINCT agreement_id) FROM agreement_services WHERE service_id = s.service_id) as agreement_count
+    FROM service_catalog s
+    $where
+    ORDER BY $sort $order
+    LIMIT $record_from, $record_to"
 );
 
 $num_rows = mysqli_fetch_row(mysqli_query($mysqli, "SELECT FOUND_ROWS()"));
+$categories = getServiceCategories($mysqli);
 
 ?>
-    <div class="card card-dark">
-        <div class="card-header py-2">
-            <h3 class="card-title mt-2"><i class="fa fa-fw fa-stream mr-2"></i>Services</h3>
-            <div class="card-tools">
-                <?php if (lookupUserPermission("module_support") >= 2) { ?>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addServiceModal"><i class="fas fa-plus mr-2"></i>New Service</button>
-                <?php } ?>
+
+<div class="card">
+    <div class="card-header bg-dark py-2">
+        <h3 class="card-title mt-2"><i class="fas fa-fw fa-cogs mr-2"></i>Service Catalog</h3>
+        <div class="card-tools">
+            <?php if (lookupUserPermission("module_client") >= 2) { ?>
+                <a href="javascript:void(0)" class="btn btn-primary" data-toggle="modal" data-target="#service_add_modal">
+                    <i class="fas fa-plus mr-2"></i>New Service
+                </a>
+            <?php } ?>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Filters -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="search_services" placeholder="Search services..." value="<?php echo $search_query; ?>">
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="category_filter">
+                    <option value="">-- All Categories --</option>
+                    <?php foreach ($categories as $cat) { ?>
+                        <option value="<?php echo $cat; ?>" <?php echo ($category_filter == $cat) ? 'selected' : ''; ?>>
+                            <?php echo $cat; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="status_filter">
+                    <option value="Active" <?php echo ($status_filter == 'Active') ? 'selected' : ''; ?>>Active</option>
+                    <option value="Archived" <?php echo ($status_filter == 'Archived') ? 'selected' : ''; ?>>Archived</option>
+                    <option value="All" <?php echo ($status_filter == 'All') ? 'selected' : ''; ?>>All</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-secondary btn-block" id="apply_filters">Apply Filters</button>
             </div>
         </div>
 
-        <div class="card-body">
-
-            <form autocomplete="off">
-                <?php if ($client_url) { ?>
-                <input type="hidden" name="client_id" value="<?php echo $client_id; ?>">
+        <!-- Services Table -->
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th>Service Name</th>
+                    <th>Category</th>
+                    <th>Default Rate</th>
+                    <th>Unit</th>
+                    <th>Status</th>
+                    <th>Clients</th>
+                    <th>Agreements</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($sql)) { ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo $row['service_name']; ?></strong>
+                            <br><small class="text-muted"><?php echo $row['service_description']; ?></small>
+                        </td>
+                        <td><span class="badge badge-info"><?php echo $row['service_category'] ?: 'Uncategorized'; ?></span></td>
+                        <td>$<?php echo number_format($row['service_default_rate'], 2); ?></td>
+                        <td><?php echo $row['service_default_unit']; ?></td>
+                        <td>
+                            <span class="badge badge-<?php echo ($row['service_status'] == 'Active') ? 'success' : 'secondary'; ?>">
+                                <?php echo $row['service_status']; ?>
+                            </span>
+                        </td>
+                        <td><?php echo $row['client_count']; ?></td>
+                        <td><?php echo $row['agreement_count']; ?></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="editService(<?php echo $row['service_id']; ?>)" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <?php if ($row['service_status'] == 'Active' && $row['client_count'] == 0 && $row['agreement_count'] == 0) { ?>
+                                <button class="btn btn-sm btn-danger" onclick="deleteService(<?php echo $row['service_id']; ?>)" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            <?php } else if ($row['service_status'] == 'Active') { ?>
+                                <button class="btn btn-sm btn-warning" onclick="archiveService(<?php echo $row['service_id']; ?>)" title="Archive">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                            <?php } else { ?>
+                                <button class="btn btn-sm btn-success" onclick="restoreService(<?php echo $row['service_id']; ?>)" title="Restore">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            <?php } ?>
+                            <button class="btn btn-sm btn-secondary" onclick="cloneService(<?php echo $row['service_id']; ?>)" title="Clone">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </td>
+                    </tr>
                 <?php } ?>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="input-group mb-3 mb-md-0">
-                            <input type="search" class="form-control" name="q" value="<?php if (isset($q)) { echo stripslashes(nullable_htmlentities($q)); } ?>" placeholder="Search Services">
-                            <div class="input-group-append">
-                                <button class="btn btn-dark"><i class="fa fa-search"></i></button>
+            </tbody>
+        </table>
+
+        <?php if ($num_rows[0] == 0) { ?>
+            <div class="alert alert-info">No services found. <a href="javascript:void(0)" data-toggle="modal" data-target="#service_add_modal">Create one</a></div>
+        <?php } ?>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="service_add_modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title">New Service</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="service_add_form" method="POST" action="post.php">
+                    <input type="hidden" name="add_service" value="1">
+
+                    <div class="form-group">
+                        <label>Service Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="service_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="service_description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Default Rate <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control" name="service_default_rate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Default Unit</label>
+                                <input type="text" class="form-control" name="service_default_unit" value="Hour" placeholder="Hour, Month, Incident, etc.">
                             </div>
                         </div>
                     </div>
 
-                    <?php if ($client_url) { ?>
-                    <div class="col-md-2"></div>
-                    <?php } else { ?>
-                    <div class="col-md-2">
-                        <div class="input-group">
-                            <select class="form-control select2" name="client" onchange="this.form.submit()">
-                                <option value="" <?php if ($client == "") { echo "selected"; } ?>>- All Clients -</option>
-
-                                <?php
-                                $sql_clients_filter = mysqli_query($mysqli, "
-                                    SELECT DISTINCT client_id, client_name 
-                                    FROM clients
-                                    JOIN services ON service_client_id = client_id
-                                    WHERE client_archived_at IS NULL 
-                                    $access_permission_query
-                                    ORDER BY client_name ASC
-                                ");
-                                while ($row = mysqli_fetch_array($sql_clients_filter)) {
-                                    $client_id = intval($row['client_id']);
-                                    $client_name = nullable_htmlentities($row['client_name']);
-                                ?>
-                                    <option <?php if ($client == $client_id) { echo "selected"; } ?> value="<?php echo $client_id; ?>"><?php echo $client_name; ?></option>
-                                <?php
-                                }
-                                ?>
-
-                            </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" class="form-control" name="service_category" placeholder="Support, Projects, etc.">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Minimum Hours</label>
+                                <input type="number" step="0.01" class="form-control" name="service_minimum_hours">
+                            </div>
                         </div>
                     </div>
-                    <?php } ?>
 
-                    <div class="col-md-6">
-                        <div class="float-right">
-                        </div>
+                    <div class="form-group">
+                        <label>Sort Order</label>
+                        <input type="number" class="form-control" name="service_sort_order" value="0">
                     </div>
-                </div>
-            </form>
-            <hr>
 
-            <div class="table-responsive-sm">
-                <table class="table table-striped table-borderless table-hover">
-                    <thead class="<?php if ($num_rows[0] == 0) { echo "d-none"; } ?>">
-                    <tr>
-                        <th>
-                            <a class="text-dark" href="?<?php echo $url_query_strings_sort; ?>&sort=service_name&order=<?php echo $disp; ?>">
-                                Name <?php if ($sort == 'service_name') { echo $order_icon; } ?>
-                            </a>
-                        </th>
-                        <th>
-                            <a class="text-dark" href="?<?php echo $url_query_strings_sort; ?>&sort=service_category&order=<?php echo $disp; ?>">
-                                Category <?php if ($sort == 'service_category') { echo $order_icon; } ?>
-                            </a>
-                        </th>
-                        <th>
-                            <a class="text-dark" href="?<?php echo $url_query_strings_sort; ?>&sort=service_importance&order=<?php echo $disp; ?>">
-                                Importance <?php if ($sort == 'service_importance') { echo $order_icon; } ?>
-                            </a>
-                        </th>
-                        <th>
-                            <a class="text-dark" href="?<?php echo $url_query_strings_sort; ?>&sort=service_updated_at&order=<?php echo $disp; ?>">
-                                Updated <?php if ($sort == 'service_updated_at') { echo $order_icon; } ?>
-                            </a>
-                        </th>
-                        <?php if (!$client_url) { ?>
-                        <th>
-                            <a class="text-dark" href="?<?php echo $url_query_strings_sort; ?>&sort=client_name&order=<?php echo $disp; ?>">
-                                Client <?php if ($sort == 'client_name') { echo $order_icon; } ?>
-                            </a>
-                        </th>
-                        <?php } ?>
-                        <th class="text-center">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-
-                    while ($row = mysqli_fetch_array($sql)) {
-                        $client_id = intval($row['client_id']);
-                        $client_name = nullable_htmlentities($row['client_name']);
-                        $service_id = intval($row['service_id']);
-                        $service_name = nullable_htmlentities($row['service_name']);
-                        $service_description = nullable_htmlentities($row['service_description']);
-                        $service_category = nullable_htmlentities($row['service_category']);
-                        $service_importance = nullable_htmlentities($row['service_importance']);
-                        $service_backup = nullable_htmlentities($row['service_backup']);
-                        $service_notes = nullable_htmlentities($row['service_notes']);
-                        $service_created_at = nullable_htmlentities($row['service_created_at']);
-                        $service_updated_at = nullable_htmlentities($row['service_updated_at']);
-                        $service_review_due = nullable_htmlentities($row['service_review_due']);
-
-                        ?>
-
-                        <tr>
-                            <!-- Name/Category/Updated/Importance from DB -->
-                            <td>
-                                <a class="text-dark ajax-modal" href="#"
-                                    data-modal-size="xl"
-                                    data-modal-url="modals/service/service_details.php?id=<?= $service_id ?>">
-                                    <div class="media">
-                                        <i class="fa fa-fw fa-2x fa-stream mr-3"></i>
-                                        <div class="media-body">
-                                            <div><?php echo $service_name; ?></div>
-                                            <div><small class="text-secondary"><?php echo $service_description; ?></small></div>
-                                        </div>
-                                    </div>
-                                </a>
-                        
-                            </td>
-                            <td><?php echo $service_category ?></td>
-                            <td><?php echo $service_importance ?></td>
-                            <td><?php echo $service_updated_at ?></td>
-                            <?php if (!$client_url) { ?>
-                            <td><a href="services.php?client_id=<?php echo $client_id; ?>"><?php echo $client_name; ?></a></td>
-                            <?php } ?>
-
-                            <!-- Action -->
-                            <td>
-                                <div class="dropdown dropleft text-center">
-                                    <button class="btn btn-secondary btn-sm" type="button" data-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-h"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item ajax-modal" href="#"
-                                            data-modal-url="modals/service/service_edit.php?id=<?= $service_id ?>">
-                                            <i class="fas fa-fw fa-edit mr-2"></i>Edit
-                                        </a>
-                                        <?php if (lookupUserPermission("module_support") >= 3) { ?>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item text-danger text-bold confirm-link" href="post.php?delete_service=<?php echo $service_id; ?>&csrf_token=<?php echo $_SESSION['csrf_token']; ?>">
-                                                <i class="fas fa-fw fa-trash mr-2"></i>Delete
-                                            </a>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php
-                    }
-                    ?>
-
-                    </tbody>
-                </table>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Create Service</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
             </div>
-            <?php require_once "../includes/filter_footer.php";
- ?>
         </div>
     </div>
+</div>
 
-<?php
-require_once "modals/service/service_add.php";
-require_once "../includes/footer.php";
+<!-- Edit Service Modal -->
+<div class="modal fade" id="service_edit_modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title">Edit Service</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="service_edit_form" method="POST" action="post.php">
+                    <input type="hidden" name="edit_service" value="1">
+                    <input type="hidden" name="service_id" id="edit_service_id">
+
+                    <div class="form-group">
+                        <label>Service Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="edit_service_name" name="service_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="edit_service_description" name="service_description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Default Rate <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control" id="edit_service_rate" name="service_default_rate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Default Unit</label>
+                                <input type="text" class="form-control" id="edit_service_unit" name="service_default_unit">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" class="form-control" id="edit_service_category" name="service_category">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Minimum Hours</label>
+                                <input type="number" step="0.01" class="form-control" id="edit_service_minimum" name="service_minimum_hours">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sort Order</label>
+                        <input type="number" class="form-control" id="edit_service_sort" name="service_sort_order">
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Update Service</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editService(serviceId) {
+    // Fetch service data and populate modal
+    fetch('api/service.php?action=get&id=' + serviceId)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('edit_service_id').value = data.service_id;
+            document.getElementById('edit_service_name').value = data.service_name;
+            document.getElementById('edit_service_description').value = data.service_description;
+            document.getElementById('edit_service_rate').value = data.service_default_rate;
+            document.getElementById('edit_service_unit').value = data.service_default_unit;
+            document.getElementById('edit_service_category').value = data.service_category;
+            document.getElementById('edit_service_minimum').value = data.service_minimum_hours;
+            document.getElementById('edit_service_sort').value = data.service_sort_order;
+            $('#service_edit_modal').modal('show');
+        });
+}
+
+function deleteService(serviceId) {
+    if (confirm('Are you sure? This cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'post.php';
+        form.innerHTML = '<input type="hidden" name="delete_service" value="1"><input type="hidden" name="service_id" value="' + serviceId + '">';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function archiveService(serviceId) {
+    if (confirm('Archive this service? It can be restored later.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'post.php';
+        form.innerHTML = '<input type="hidden" name="archive_service" value="1"><input type="hidden" name="service_id" value="' + serviceId + '">';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function restoreService(serviceId) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'post.php';
+    form.innerHTML = '<input type="hidden" name="restore_service" value="1"><input type="hidden" name="service_id" value="' + serviceId + '">';
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function cloneService(serviceId) {
+    const newName = prompt('Enter name for cloned service:', '');
+    if (newName) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'post.php';
+        form.innerHTML = '<input type="hidden" name="clone_service" value="1"><input type="hidden" name="service_id" value="' + serviceId + '"><input type="hidden" name="clone_name" value="' + newName + '">';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Filter handling
+document.getElementById('apply_filters').addEventListener('click', function() {
+    const search = document.getElementById('search_services').value;
+    const category = document.getElementById('category_filter').value;
+    const status = document.getElementById('status_filter').value;
+    window.location = 'services.php?search=' + search + '&category=' + category + '&status=' + status;
+});
+</script>
