@@ -9,6 +9,7 @@
             </div>
 
             <form action="post.php" method="post" autocomplete="off">
+                <input type="hidden" name="module" value="service">
 
                 <div class="modal-body">
                     <?php if ($client_url) { ?>

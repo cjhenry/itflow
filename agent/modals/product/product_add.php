@@ -8,6 +8,7 @@
                 </button>
             </div>
             <form action="post.php" method="post" autocomplete="off">
+                <input type="hidden" name="module" value="product">
                 <input type="hidden" name="type" value="<?= $type_filter ?>">
 
                 <div class="modal-body">

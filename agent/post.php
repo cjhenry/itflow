@@ -14,14 +14,23 @@ define('FROM_POST_HANDLER', true);
 
 // Determine which files we should load
 
-// Parse URL & get the path
-$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+// Determine module to load - check for explicit module field first, fall back to HTTP_REFERER
+$module = isset($_POST['module']) ? sanitizeInput($_POST['module']) : null;
 
-// Get the base name (the page name)
-$module = explode(".", basename($path))[0];
+if (!$module && isset($_GET['module'])) {
+    $module = sanitizeInput($_GET['module']);
+}
 
-// Strip off any _details bits
-$module = str_ireplace('_details', '', $module);
+if (!$module && isset($_SERVER['HTTP_REFERER'])) {
+    // Parse URL & get the path
+    $path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+
+    // Get the base name (the page name)
+    $module = explode(".", basename($path))[0];
+
+    // Strip off any _details bits
+    $module = str_ireplace('_details', '', $module);
+}
 
 // Dynamically load admin-related module POST logic
 
