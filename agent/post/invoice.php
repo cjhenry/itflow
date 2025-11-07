@@ -508,7 +508,7 @@ if (isset($_GET['delete_invoice'])) {
 }
 
 if (isset($_POST['add_invoice_item'])) {
-    
+
     enforceUserPermission('module_sales', 2);
 
     $invoice_id = intval($_POST['invoice_id']);
@@ -519,6 +519,7 @@ if (isset($_POST['add_invoice_item'])) {
     $tax_id = intval($_POST['tax_id']);
     $item_order = intval($_POST['item_order']);
     $product_id = intval($_POST['product_id']);
+    $service_id = intval($_POST['service_id'] ?? 0);
 
     $subtotal = $price * $qty;
     
@@ -561,7 +562,8 @@ if (isset($_POST['add_invoice_item'])) {
 
     $total = $subtotal + $tax_amount;
 
-    mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_tax = $tax_amount, item_total = $total, item_order = $item_order, item_tax_id = $tax_id, item_product_id = $product_id, item_invoice_id = $invoice_id");
+    $service_id_sql = $service_id > 0 ? $service_id : "NULL";
+    mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_tax = $tax_amount, item_total = $total, item_order = $item_order, item_tax_id = $tax_id, item_product_id = $product_id, item_service_id = $service_id_sql, item_invoice_id = $invoice_id");
 
     // Get Discount and Invoice Details
     $sql = mysqli_query($mysqli,"SELECT * FROM invoices WHERE invoice_id = $invoice_id");
@@ -615,7 +617,7 @@ if (isset($_POST['invoice_note'])) {
 }
 
 if (isset($_POST['edit_item'])) {
-    
+
     enforceUserPermission('module_sales', 2);
 
     $item_id = intval($_POST['item_id']);
@@ -625,6 +627,7 @@ if (isset($_POST['edit_item'])) {
     $price = floatval($_POST['price']);
     $tax_id = intval($_POST['tax_id']);
     $product_id = intval($_POST['product_id']);
+    $service_id = intval($_POST['service_id'] ?? 0);
 
     $subtotal = $price * $qty;
 
@@ -639,7 +642,8 @@ if (isset($_POST['edit_item'])) {
 
     $total = $subtotal + $tax_amount;
 
-    mysqli_query($mysqli,"UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id WHERE item_id = $item_id");
+    $service_id_sql = $service_id > 0 ? $service_id : "NULL";
+    mysqli_query($mysqli,"UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_service_id = $service_id_sql WHERE item_id = $item_id");
 
     // Determine what type of line item
     $sql = mysqli_query($mysqli,"SELECT item_invoice_id, item_quote_id, item_recurring_invoice_id FROM invoice_items WHERE item_id = $item_id");

@@ -7,6 +7,8 @@ if (isset($_GET['client_id'])) {
     require_once "includes/inc_all.php";
 }
 
+require_once "includes/inc_invoice_services.php";
+
 // Perms
 enforceUserPermission('module_sales');
 
@@ -455,7 +457,17 @@ if (isset($_GET['invoice_id'])) {
                                         <input type="hidden" name="invoice_id" value="<?= $invoice_id ?>">
                                         <input type="hidden" id="product_id" name="product_id" value="<?= $item_product_id ?? 0 ?>">
                                         <input type="hidden" name="item_order" value="<?php echo mysqli_num_rows($sql_invoice_items) + 1; ?>">
-                                        <td></td>
+                                        <td style="min-width: 200px;">
+                                            <select class="form-control select2-inline" id="service_id_inline" name="service_id" onchange="populateFromService(this)">
+                                                <option value="0">-- Select Service --</option>
+                                                <?php
+                                                    $inline_services = getServicesForInvoice($mysqli, $client_id);
+                                                    foreach ($inline_services as $svc) {
+                                                        echo '<option value="' . $svc['service_id'] . '" data-rate="' . $svc['effective_rate'] . '" data-name="' . htmlspecialchars($svc['service_name']) . '">' . htmlspecialchars($svc['service_name']) . ' - $' . number_format($svc['effective_rate'], 2) . '</option>';
+                                                    }
+                                                ?>
+                                            </select>
+                                        </td>
                                         <td>
                                             <input type="text" class="form-control" id="name" name="name" placeholder="Item" required>
                                         </td>
@@ -796,6 +808,28 @@ $(function() {
     };
 });
 
+</script>
+
+<script>
+// Handle service selection in invoice item form
+function populateFromService(selectElement) {
+    const serviceId = selectElement.value;
+    if (serviceId !== '0') {
+        const option = selectElement.options[selectElement.selectedIndex];
+        const rate = option.getAttribute('data-rate');
+        const name = option.getAttribute('data-name');
+
+        // Populate item name if not already filled
+        const nameInput = document.getElementById('name');
+        if (!nameInput.value) {
+            nameInput.value = name;
+        }
+
+        // Populate price
+        const priceInput = document.getElementById('price');
+        priceInput.value = parseFloat(rate).toFixed(2);
+    }
+}
 </script>
 
 <script src="../plugins/SortableJS/Sortable.min.js"></script>
