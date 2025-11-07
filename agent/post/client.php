@@ -121,7 +121,7 @@ if (isset($_POST['add_client'])) {
 
     flash_alert("Client <strong>$name</strong> created");
 
-    redirect();
+    redirect('clients.php');
 
 }
 
@@ -159,7 +159,7 @@ if (isset($_POST['edit_client'])) {
 
     flash_alert("Client <strong>$name</strong> updated");
 
-    redirect();
+    redirect('clients.php');
 
 }
 
@@ -180,7 +180,7 @@ if (isset($_GET['archive_client'])) {
 
     flash_alert("Client <strong>$client_name</strong> archived", 'error');
 
-    redirect();
+    redirect('clients.php');
 
 }
 
@@ -201,7 +201,7 @@ if (isset($_GET['restore_client'])) {
 
     flash_alert("Client <strong>$client_name</strong> restored");
 
-    redirect();
+    redirect('clients.php');
 
 }
 
