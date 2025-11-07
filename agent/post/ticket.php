@@ -27,6 +27,7 @@ if (isset($_POST['add_ticket'])) {
     $asset_id = intval($_POST['asset']);
     $location_id = intval($_POST['location']);
     $project_id = intval($_POST['project']);
+    $agreement_id = intval($_POST['agreement'] ?? 0);
     $use_primary_contact = intval($_POST['use_primary_contact'] ?? 0);
     $ticket_template_id = intval($_POST['ticket_template_id']);
     $billable = intval($_POST['billable'] ?? 0);
@@ -65,7 +66,7 @@ if (isset($_POST['add_ticket'])) {
 
     mysqli_query($mysqli, "UPDATE settings SET config_ticket_next_number = $new_config_ticket_next_number WHERE company_id = 1");
 
-    mysqli_query($mysqli, "INSERT INTO tickets SET ticket_prefix = '$config_ticket_prefix', ticket_number = $ticket_number, ticket_source = 'Agent', ticket_category = $category_id, ticket_subject = '$subject', ticket_details = '$details', ticket_priority = '$priority', ticket_billable = '$billable', ticket_status = '$ticket_status', ticket_vendor_ticket_number = '$vendor_ticket_number', ticket_vendor_id = $vendor_id, ticket_location_id = $location_id, ticket_asset_id = $asset_id, ticket_created_by = $session_user_id, ticket_assigned_to = $assigned_to, ticket_contact_id = $contact, ticket_url_key = '$url_key', ticket_due_at = $due, ticket_client_id = $client_id, ticket_invoice_id = 0, ticket_project_id = $project_id");
+    mysqli_query($mysqli, "INSERT INTO tickets SET ticket_prefix = '$config_ticket_prefix', ticket_number = $ticket_number, ticket_source = 'Agent', ticket_category = $category_id, ticket_subject = '$subject', ticket_details = '$details', ticket_priority = '$priority', ticket_billable = '$billable', ticket_status = '$ticket_status', ticket_vendor_ticket_number = '$vendor_ticket_number', ticket_vendor_id = $vendor_id, ticket_location_id = $location_id, ticket_asset_id = $asset_id, ticket_created_by = $session_user_id, ticket_assigned_to = $assigned_to, ticket_contact_id = $contact, ticket_url_key = '$url_key', ticket_due_at = $due, ticket_client_id = $client_id, ticket_agreement_id = $agreement_id, ticket_invoice_id = 0, ticket_project_id = $project_id");
 
     $ticket_id = mysqli_insert_id($mysqli);
 
@@ -205,6 +206,7 @@ if (isset($_POST['edit_ticket'])) {
     $asset_id = intval($_POST['asset']);
     $location_id = intval($_POST['location']);
     $project_id = intval($_POST['project']);
+    $agreement_id = intval($_POST['agreement'] ?? 0);
     // Validate/clean due field
     $dueInput = $_POST['due'] ?? null;
     if ($dueInput === null || trim($dueInput) === '') {
@@ -422,6 +424,7 @@ if (isset($_POST['edit_ticket_project'])) {
 
     $ticket_id = intval($_POST['ticket_id']);
     $project_id = intval($_POST['project']);
+    $agreement_id = intval($_POST['agreement'] ?? 0);
 
     $project_name = sanitizeInput(getFieldById('projects', $project_id, 'project_name'));
     $client_id = intval(getFieldById('tickets', $ticket_id, 'ticket_client_id'));
@@ -1570,6 +1573,7 @@ if (isset($_POST['add_ticket_reply'])) {
     $ticket_reply = $_POST['ticket_reply']; // Reply is SQL escaped below
     $ticket_status = intval($_POST['status']);
     $client_id = intval($_POST['client_id']);
+    $service_id = intval($_POST['service_id'] ?? 0);
 
     // Time tracking, inputs & combine into string
     $hours = intval($_POST['hours']);
@@ -1609,7 +1613,8 @@ if (isset($_POST['add_ticket_reply'])) {
     if (!empty($ticket_reply)) {
 
         // Add reply
-        mysqli_query($mysqli, "INSERT INTO ticket_replies SET ticket_reply = '$ticket_reply', ticket_reply_time_worked = '$ticket_reply_time_worked', ticket_reply_type = '$ticket_reply_type', ticket_reply_by = $session_user_id, ticket_reply_ticket_id = $ticket_id");
+        $service_id_sql = $service_id > 0 ? $service_id : "NULL";
+        mysqli_query($mysqli, "INSERT INTO ticket_replies SET ticket_reply = '$ticket_reply', ticket_reply_time_worked = '$ticket_reply_time_worked', ticket_reply_service_id = $service_id_sql, ticket_reply_type = '$ticket_reply_type', ticket_reply_by = $session_user_id, ticket_reply_ticket_id = $ticket_id");
 
         $ticket_reply_id = mysqli_insert_id($mysqli);
 
@@ -1741,10 +1746,12 @@ if (isset($_POST['edit_ticket_reply'])) {
     $ticket_reply = mysqli_real_escape_string($mysqli, $_POST['ticket_reply']);
     $ticket_reply_type = sanitizeInput($_POST['ticket_reply_type']);
     $ticket_reply_time_worked = sanitizeInput($_POST['time']);
+    $service_id = intval($_POST['service_id'] ?? 0);
 
     $client_id = intval($_POST['client_id']);
 
-    mysqli_query($mysqli, "UPDATE ticket_replies SET ticket_reply = '$ticket_reply', ticket_reply_type = '$ticket_reply_type', ticket_reply_time_worked = '$ticket_reply_time_worked' WHERE ticket_reply_id = $ticket_reply_id AND ticket_reply_type != 'Client'") or die(mysqli_error($mysqli));
+    $service_id_sql = $service_id > 0 ? $service_id : "NULL";
+    mysqli_query($mysqli, "UPDATE ticket_replies SET ticket_reply = '$ticket_reply', ticket_reply_type = '$ticket_reply_type', ticket_reply_time_worked = '$ticket_reply_time_worked', ticket_reply_service_id = $service_id_sql WHERE ticket_reply_id = $ticket_reply_id AND ticket_reply_type != 'Client'") or die(mysqli_error($mysqli));
 
     logAction("Ticket", "Reply", "$session_name edited ticket_reply", $client_id, $ticket_reply_id);
 

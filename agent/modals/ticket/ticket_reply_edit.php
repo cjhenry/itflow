@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../../includes/modal_header.php';
+require_once '../../includes/inc_invoice_services.php';
 
 $ticket_reply_id = intval($_GET['id']);
 
@@ -16,6 +17,11 @@ $ticket_reply_time_worked = date_create($row['ticket_reply_time_worked']);
 $ticket_reply_time_worked_formatted = date_format($ticket_reply_time_worked, 'H:i:s');
 $ticket_reply = nullable_htmlentities($row['ticket_reply']);
 $client_id = intval($row['ticket_client_id']);
+$service_id = intval($row['ticket_reply_service_id'] ?? 0);
+$ticket_id = intval($row['ticket_reply_ticket_id']);
+
+// Get available services for client
+$available_services = getServicesForInvoice($mysqli, $client_id);
 
 // Generate the HTML form content using output buffering.
 ob_start();
@@ -49,14 +55,30 @@ ob_start();
             <textarea class="form-control tinymce" name="ticket_reply"><?php echo $ticket_reply; ?></textarea>
         </div>
 
-        <?php if (!empty($ticket_reply_time_worked)) { ?>
-            <div class="col-3">
+        <div class="form-row">
+            <?php if (!empty($ticket_reply_time_worked)) { ?>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label>Time worked</label>
+                        <input class="form-control" name="time" type="text" placeholder="HH:MM:SS" pattern="([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])" value="<?php echo $ticket_reply_time_worked_formatted; ?>" required>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <div class="col-6">
                 <div class="form-group">
-                    <label>Time worked</label>
-                    <input class="form-control" name="time" type="text" placeholder="HH:MM:SS" pattern="([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])" value="<?php echo $ticket_reply_time_worked_formatted; ?>" required>
+                    <label>Service (Optional)</label>
+                    <select class="form-control" name="service_id">
+                        <option value="0">-- No Service --</option>
+                        <?php foreach ($available_services as $svc) { ?>
+                            <option value="<?php echo $svc['service_id']; ?>" <?php echo $service_id == $svc['service_id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($svc['service_name']); ?> - $<?php echo number_format($svc['effective_rate'], 2); ?>
+                            </option>
+                        <?php } ?>
+                    </select>
                 </div>
             </div>
-        <?php } ?>
+        </div>
 
     </div>
     <div class="modal-footer">
