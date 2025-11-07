@@ -31,6 +31,7 @@ $countries_array = array(
     "Cambodia",
     "Cameroon",
     "Canada",
+    "Cayman Islands",
     "Cape Verde",
     "Central African Republic",
     "Chad",
