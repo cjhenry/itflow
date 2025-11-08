@@ -173,11 +173,11 @@ if (isset($_POST['add_quote_item'])) {
     $quote_id = intval($_POST['quote_id']);
     $name = sanitizeInput($_POST['name']);
     $description = sanitizeInput($_POST['description']);
-    $qty = floatval($_POST['qty']);
-    $price = floatval($_POST['price']);
-    $discount = floatval($_POST['discount'] ?? 0);
-    $tax_id = intval($_POST['tax_id']);
-    $item_order = intval($_POST['item_order']);
+    $qty = floatval($_POST['qty'] ?? 0);
+    $price = floatval($_POST['price'] ?? 0);
+    $discount = isset($_POST['discount']) && $_POST['discount'] !== '' ? floatval($_POST['discount']) : 0;
+    $tax_id = intval($_POST['tax_id'] ?? 0);
+    $item_order = intval($_POST['item_order'] ?? 0);
 
     $subtotal = $price * $qty;
     $discount_amount = ($discount > 0) ? $subtotal * ($discount / 100) : 0;

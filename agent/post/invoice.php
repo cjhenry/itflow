@@ -623,11 +623,11 @@ if (isset($_POST['edit_item'])) {
     $item_id = intval($_POST['item_id']);
     $name = sanitizeInput($_POST['name']);
     $description = sanitizeInput($_POST['description']);
-    $qty = floatval($_POST['qty']);
-    $price = floatval($_POST['price']);
-    $discount = floatval($_POST['discount'] ?? 0);
-    $tax_id = intval($_POST['tax_id']);
-    $product_id = intval($_POST['product_id']);
+    $qty = floatval($_POST['qty'] ?? 0);
+    $price = floatval($_POST['price'] ?? 0);
+    $discount = isset($_POST['discount']) && $_POST['discount'] !== '' ? floatval($_POST['discount']) : 0;
+    $tax_id = intval($_POST['tax_id'] ?? 0);
+    $product_id = intval($_POST['product_id'] ?? 0);
     $service_id = intval($_POST['service_id'] ?? 0);
 
     $subtotal = $price * $qty;
