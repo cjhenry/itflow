@@ -42,7 +42,11 @@ foreach (glob("post/*.php") as $user_module) {
     if (!preg_match('/_model\.php$/', basename($user_module))) {
         $handler_module = str_replace('.php', '', basename($user_module));
         // Only load handler if it matches the determined module
-        if (!$module || $handler_module === $module) {
+        // Also handle singular/plural variations (quotes->quote, invoices->invoice, etc)
+        $module_singular = rtrim($module, 's');
+        $module_match = !$module || $handler_module === $module || $handler_module === $module_singular;
+
+        if ($module_match) {
             require_once $user_module;
         }
     }

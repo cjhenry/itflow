@@ -20,11 +20,11 @@ $user_config_calendar_first_day = intval($row['user_config_calendar_first_day'])
 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-outline-primary <?php if ($user_config_theme_dark === 0) { echo "active"; } ?>">
-                    <input type="radio" name="dark_mode" id="light-mode" autocomplete="off" <?php if ($user_config_theme_dark === 0) { echo "checked"; } ?>>
+                    <input type="radio" name="dark_mode" id="light-mode" value="0" autocomplete="off" <?php if ($user_config_theme_dark === 0) { echo "checked"; } ?>>
                     <i class="fas fa-sun mr-2"></i>Light
                     </label>
                     <label class="btn btn-outline-dark <?php if ($user_config_theme_dark === 1) { echo "active"; } ?>">
-                    <input type="radio" name="dark_mode" id="dark-mode" autocomplete="off" value="1" <?php if ($user_config_theme_dark === 1) { echo "checked"; } ?>>
+                    <input type="radio" name="dark_mode" id="dark-mode" value="1" autocomplete="off" <?php if ($user_config_theme_dark === 1) { echo "checked"; } ?>>
                     <i class="fas fa-moon mr-2"></i>Dark
                     </label>
                 </div>

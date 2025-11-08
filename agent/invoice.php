@@ -162,26 +162,48 @@ if (isset($_GET['invoice_id'])) {
     //Set Badge color based off of invoice status
     $invoice_badge_color = getInvoiceBadgeColor($invoice_status);
 
-    //Product autocomplete
-    $products_sql = mysqli_query($mysqli, "
-        SELECT 
+    //Product & Service autocomplete - combine products and service catalog
+    $items_sql = mysqli_query($mysqli, "
+        SELECT
             product_name AS label,
+            CONCAT('[Product] ', product_name) AS display_label,
             product_type AS type,
             product_description AS description,
             product_price AS price,
             product_tax_id AS tax,
             tax_percent,
             product_id AS prod_id,
-            COALESCE(SUM(product_stock.stock_qty), 0) AS available_stock
+            COALESCE(SUM(product_stock.stock_qty), 0) AS available_stock,
+            'Product' AS item_type,
+            '' AS category
         FROM products
         LEFT JOIN product_stock ON product_id = stock_product_id
         LEFT JOIN taxes ON product_tax_id = tax_id
         WHERE product_archived_at IS NULL
         GROUP BY product_id
+
+        UNION ALL
+
+        SELECT
+            service_name AS label,
+            CONCAT('[', service_category, '] ', service_name) AS display_label,
+            'service' AS type,
+            service_description AS description,
+            service_default_rate AS price,
+            0 AS tax,
+            0 AS tax_percent,
+            0 AS prod_id,
+            0 AS available_stock,
+            'Service' AS item_type,
+            service_category AS category
+        FROM service_catalog
+        WHERE service_status = 'Active'
+
+        ORDER BY label ASC
     ");
 
-    if (mysqli_num_rows($products_sql) > 0) {
-        while ($row = mysqli_fetch_array($products_sql)) {
+    if (mysqli_num_rows($items_sql) > 0) {
+        while ($row = mysqli_fetch_array($items_sql)) {
             $products[] = $row;
         }
         $json_products = json_encode($products);
@@ -481,8 +503,12 @@ if (isset($_GET['invoice_id'])) {
                                             <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" id="price" name="price" placeholder="Price (<?php echo $invoice_currency_code; ?>)">
                                         </td>
                                         <td>
+                                            <?php if (!$config_hide_tax_fields) { ?>
                                             <select class="form-control select2" name="tax_id" id="tax" required>
-                                                <option value="0">No Tax</option>
+                                                <option value="0">No Tax</option><?php } else { ?>
+                                            <input type="hidden" name="tax_id" value="0">
+                                            <select class="form-control select2" name="tax_id" id="tax" style="display:none;" required>
+                                                <option value="0">No Tax</option><?php } ?>
                                                 <?php
                                                 $taxes_sql = mysqli_query($mysqli, "SELECT * FROM taxes WHERE tax_archived_at IS NULL ORDER BY tax_name ASC");
                                                 while ($row = mysqli_fetch_array($taxes_sql)) {
@@ -762,7 +788,15 @@ $(function() {
     var availableProducts = <?php echo $json_products ?? '[]'?>;
 
     $("#name").autocomplete({
-        source: availableProducts,
+        source: function(request, response) {
+            var term = request.term.toLowerCase();
+            var filtered = availableProducts.filter(function(item) {
+                return item.label.toLowerCase().indexOf(term) > -1 ||
+                       (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
+                       (item.description && item.description.toLowerCase().indexOf(term) > -1);
+            });
+            response(filtered);
+        },
         minLength: 1,
         delay: 0,
         select: function (event, ui) {
@@ -778,8 +812,9 @@ $(function() {
 
     // Keep it simple: default jQuery UI look, just richer content
     $("#name").autocomplete("instance")._renderItem = function(ul, item) {
-        var typeText = item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase() : "";
+        var typeText = item.item_type || (item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1).toLowerCase() : "");
         var showStock = (typeText.toLowerCase() !== "service");
+        var categoryText = item.category ? "[" + item.category + "] " : "";
 
         var taxText = (item.tax_percent != null) ? (parseFloat(item.tax_percent) + "%") : "No tax";
         var priceText = (item.price != null && item.price !== "") ? String(item.price) : "";
@@ -787,7 +822,7 @@ $(function() {
         var infoLeft =
             "<div class='d-flex justify-content-between align-items-start'>" +
                 "<div class='flex-fill pr-2'>" +
-                    "<div class='font-weight-bold'>" + (item.label || "") +
+                    "<div class='font-weight-bold'>" + categoryText + (item.label || "") +
                         (typeText ? " <small class='text-muted'>(" + typeText + ")</small>" : "") +
                     "</div>" +
                     "<div class='small text-muted'>" + (item.description || "") + "</div>" +

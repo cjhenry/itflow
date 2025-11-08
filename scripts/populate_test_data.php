@@ -132,6 +132,18 @@ $client_ids = [];
 $contact_counter = 0;
 
 foreach ($test_clients as $client_data) {
+    // Check if client already exists
+    $check_sql = "SELECT client_id FROM clients WHERE client_name = '" . mysqli_real_escape_string($mysqli, $client_data['name']) . "' AND client_archived_at IS NULL LIMIT 1";
+    $check_result = mysqli_query($mysqli, $check_sql);
+
+    if (mysqli_num_rows($check_result) > 0) {
+        $existing = mysqli_fetch_assoc($check_result);
+        $client_id = $existing['client_id'];
+        $client_ids[] = $client_id;
+        echo "⊘ Skipped client: " . $client_data['name'] . " (already exists, ID: $client_id)\n";
+        continue;
+    }
+
     // Create client
     $sql = "INSERT INTO clients SET
         client_name = '" . mysqli_real_escape_string($mysqli, $client_data['name']) . "',

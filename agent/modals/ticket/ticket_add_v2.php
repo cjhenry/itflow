@@ -225,6 +225,8 @@
                         <div class="tab-pane fade" id="pills-add-relationships">
                             To-do: project, etc.
 
+                            <div class="form-group">                                <label> Agreement </label>                                <div class="input-group">                                    <div class="input-group-prepend">                                        <span class="input-group-text"><i class="fa fa-fw fa-handshake"></i></span>                                    </div>                                    <select class="form-control select2" name="agreement" id="agreementSelect" required>                                        <option value="">- Select Agreement -</option>                                    </select>                                </div>                            </div>
+
                             <div class="form-group">
                                 <label> Asset </label>
                                 <div class="input-group">

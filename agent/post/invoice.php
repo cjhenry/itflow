@@ -2348,7 +2348,7 @@ if (isset($_GET['export_invoice_pdf'])) {
     if ($invoice_discount > 0) {
         $html .= '<tr><td>Discount:</td><td align="right">-' . numfmt_format_currency($currency_format, $invoice_discount, $invoice_currency_code) . '</td></tr>';
     }
-    if ($total_tax > 0) {
+    if ($total_tax > 0 && !$config_hide_tax_fields) {
         $html .= '<tr><td>Tax:</td><td align="right">' . numfmt_format_currency($currency_format, $total_tax, $invoice_currency_code) . '</td></tr>';
     }
     $html .= '
