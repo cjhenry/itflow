@@ -672,15 +672,28 @@ if (isset($_POST['edit_item'])) {
 
     // Determine what type of line item
     $sql = mysqli_query($mysqli,"SELECT item_invoice_id, item_quote_id, item_recurring_invoice_id FROM invoice_items WHERE item_id = $item_id");
+    if (!$sql) {
+        $error_msg = "Error fetching item details: " . mysqli_error($mysqli);
+        error_log("ERROR: " . $error_msg);
+        die($error_msg);
+    }
     $row = mysqli_fetch_array($sql);
     $invoice_id = intval($row['item_invoice_id']);
     $quote_id = intval($row['item_quote_id']);
     $recurring_invoice_id = intval($row['item_recurring_invoice_id']);
 
+    error_log("DEBUG: Line item type - invoice_id: $invoice_id, quote_id: $quote_id, recurring_invoice_id: $recurring_invoice_id");
+
     if ($invoice_id > 0) {
         //Get Discount Amount
         $sql = mysqli_query($mysqli,"SELECT * FROM invoices WHERE invoice_id = $invoice_id");
+        if (!$sql) {
+            $error_msg = "Error fetching invoice: " . mysqli_error($mysqli);
+            error_log("ERROR: " . $error_msg);
+            die($error_msg);
+        }
         $row = mysqli_fetch_array($sql);
+        error_log("DEBUG: Invoice row fetch result: " . json_encode($row));
         $invoice_prefix = sanitizeInput($row['invoice_prefix']);
         $invoice_number = intval($row['invoice_number']);
         $client_id = intval($row['invoice_client_id']);
@@ -699,9 +712,16 @@ if (isset($_POST['edit_item'])) {
         logAction("Invoice", "Edit", "$session_name edited item $name on invoice $invoice_prefix$invoice_number", $client_id, $invoice_id);
 
     } elseif ($quote_id > 0) {
+        error_log("DEBUG: Updating quote-related item");
         //Get Discount Amount
         $sql = mysqli_query($mysqli,"SELECT * FROM quotes WHERE quote_id = $quote_id");
+        if (!$sql) {
+            $error_msg = "Error fetching quote: " . mysqli_error($mysqli);
+            error_log("ERROR: " . $error_msg);
+            die($error_msg);
+        }
         $row = mysqli_fetch_array($sql);
+        error_log("DEBUG: Quote row fetch result: " . json_encode($row));
         $quote_prefix = sanitizeInput($row['quote_prefix']);
         $quote_number = intval($row['quote_number']);
         $client_id = intval($row['quote_client_id']);
@@ -709,10 +729,21 @@ if (isset($_POST['edit_item'])) {
 
         //Update Quote Balances by tallying up items
         $sql_quote_total = mysqli_query($mysqli,"SELECT SUM(item_total) AS quote_total FROM invoice_items WHERE item_quote_id = $quote_id");
+        if (!$sql_quote_total) {
+            $error_msg = "Error summing quote totals: " . mysqli_error($mysqli);
+            error_log("ERROR: " . $error_msg);
+            die($error_msg);
+        }
         $row = mysqli_fetch_array($sql_quote_total);
         $new_quote_amount = floatval($row['quote_total']) - $quote_discount;
+        error_log("DEBUG: New quote amount calculated: $new_quote_amount");
 
-        mysqli_query($mysqli,"UPDATE quotes SET quote_amount = $new_quote_amount WHERE quote_id = $quote_id");
+        $update_quote = mysqli_query($mysqli,"UPDATE quotes SET quote_amount = $new_quote_amount WHERE quote_id = $quote_id");
+        if (!$update_quote) {
+            $error_msg = "Error updating quote amount: " . mysqli_error($mysqli);
+            error_log("ERROR: " . $error_msg);
+            die($error_msg);
+        }
 
         logAction("Quote", "Edit", "$session_name edited item $name on quote $quote_prefix$quote_number", $client_id, $quote_id);
 
