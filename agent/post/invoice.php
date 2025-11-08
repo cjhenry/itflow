@@ -618,6 +618,7 @@ if (isset($_POST['invoice_note'])) {
 
 if (isset($_POST['edit_item'])) {
 
+    error_log("=============== EDIT_ITEM HANDLER STARTED ===============");
     error_log("DEBUG: edit_item POST received");
     error_log("DEBUG: POST data: " . json_encode($_POST));
 

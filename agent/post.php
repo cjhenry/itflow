@@ -54,8 +54,15 @@ foreach (glob("post/*.php") as $user_module) {
         $module_singular = rtrim($module, 's');
         $module_match = !$module || $handler_module === $module || $handler_module === $module_singular;
 
+        // Special case: always load invoice.php for edit_item (works for both invoices and quotes)
+        if (isset($_POST['edit_item']) && $handler_module === 'invoice') {
+            error_log("DEBUG: Loading invoice handler for edit_item POST");
+            $module_match = true;
+        }
+
         if ($module_match) {
             try {
+                error_log("DEBUG: Loading handler $user_module (module: $module, handler: $handler_module)");
                 require_once $user_module;
             } catch (Exception $e) {
                 error_log("Error loading $user_module: " . $e->getMessage());
