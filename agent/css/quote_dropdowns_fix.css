@@ -69,8 +69,7 @@ table#items tbody td:nth-child(6) {
 /* Increased border contrast for items table */
 table#items {
     border: 2px solid #495057 !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
+    border-collapse: collapse !important;
 }
 
 table#items thead {
@@ -80,6 +79,7 @@ table#items thead {
 table#items thead th {
     border-right: 2px solid #495057 !important;
     border-bottom: 3px solid #495057 !important;
+    padding: 8px !important;
 }
 
 table#items tbody tr {
@@ -89,6 +89,11 @@ table#items tbody tr {
 table#items tbody td {
     border-right: 2px solid #495057 !important;
     border-bottom: 2px solid #dee2e6 !important;
+    padding: 8px !important;
+}
+
+table#items tbody tr:last-child {
+    border-bottom: 2px solid #495057 !important;
 }
 
 table#items tbody tr:last-child td {
@@ -129,8 +134,7 @@ textarea.form-control {
 /* Enhanced table borders in notes and history sections */
 .card table {
     border: 2px solid #495057 !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
+    border-collapse: collapse !important;
 }
 
 .card table thead {
@@ -140,6 +144,7 @@ textarea.form-control {
 .card table thead th {
     border-right: 2px solid #495057 !important;
     border-bottom: 3px solid #495057 !important;
+    padding: 8px !important;
 }
 
 .card table tbody tr {
@@ -149,6 +154,11 @@ textarea.form-control {
 .card table tbody td {
     border-right: 2px solid #495057 !important;
     border-bottom: 2px solid #dee2e6 !important;
+    padding: 8px !important;
+}
+
+.card table tbody tr:last-child {
+    border-bottom: 2px solid #495057 !important;
 }
 
 .card table tbody tr:last-child td {
@@ -157,8 +167,7 @@ textarea.form-control {
 
 /* Quote summary table borders */
 table.table-borderless {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
+    border-collapse: collapse !important;
     border: 2px solid #495057 !important;
 }
 
@@ -169,15 +178,20 @@ table.table-borderless thead {
 table.table-borderless thead th {
     border-right: 2px solid #495057 !important;
     border-bottom: 3px solid #495057 !important;
+    padding: 8px !important;
 }
 
 table.table-borderless tbody td {
     border-bottom: 2px solid #dee2e6 !important;
     border-right: 2px solid #495057 !important;
-    padding: 0.75rem !important;
+    padding: 8px !important;
 }
 
-table.table-borderless tr:last-child td {
+table.table-borderless tbody tr:last-child {
+    border-bottom: 2px solid #495057 !important;
+}
+
+table.table-borderless tbody tr:last-child td {
     border-bottom: 2px solid #495057 !important;
 }
 
