@@ -493,6 +493,9 @@ if (isset($_GET['quote_id'])) {
                                                         ?>
                                                     </select>
                                                 </td>
+                                                <td class="text-right">
+                                                    <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
+                                                </td>
                                                 <td class="text-center">
                                                     <button class="btn btn-light text-success" type="submit" name="add_quote_item">
                                                         <i class="fa fa-check"></i>
@@ -676,6 +679,14 @@ require_once "../includes/footer.php";
 
 <script>
     $(function() {
+        // Function to calculate amount (qty × price)
+        function calculateAmount(form) {
+            var qty = parseFloat(form.find('.item-qty').val()) || 0;
+            var price = parseFloat(form.find('.item-price').val()) || 0;
+            var amount = (qty * price).toFixed(2);
+            form.find('.item-amount').val(amount);
+        }
+
         // Handle product selection change
         $(document).on('change', '.item-name', function() {
             var selectedOption = $(this).find(':selected');
@@ -688,6 +699,21 @@ require_once "../includes/footer.php";
             form.find('.item-qty').val(1);
             form.find('.item-price').val(price);
             form.find('.item-tax').val(tax).change();
+
+            // Calculate amount after setting values
+            calculateAmount(form);
+        });
+
+        // Handle qty change
+        $(document).on('change', '.item-qty', function() {
+            var form = $(this).closest('form');
+            calculateAmount(form);
+        });
+
+        // Handle price change
+        $(document).on('change', '.item-price', function() {
+            var form = $(this).closest('form');
+            calculateAmount(form);
         });
 
         // Initialize Select2 for product dropdowns
@@ -766,6 +792,9 @@ $(document).ready(function() {
                         <select class="form-control select2 item-tax" name="tax_id" required>
                             <option value="0">No Tax</option>
                         </select>
+                    </td>
+                    <td class="text-right">
+                        <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-light text-success" type="submit" name="add_quote_item">
