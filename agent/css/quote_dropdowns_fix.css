@@ -74,24 +74,38 @@ table#items tbody td:nth-child(7) {
 /* Increased border contrast for items table */
 table#items {
     border: 2px solid #495057 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
 }
 
 table#items thead {
     border-bottom: 3px solid #495057 !important;
 }
 
+table#items thead th {
+    border-right: 2px solid #495057 !important;
+    border-bottom: 3px solid #495057 !important;
+}
+
+table#items thead th:last-child {
+    border-right: none !important;
+}
+
 table#items tbody tr {
     border-bottom: 2px solid #dee2e6 !important;
 }
 
-table#items td,
-table#items th {
-    border-right: 2px solid #dee2e6 !important;
+table#items tbody td {
+    border-right: 2px solid #495057 !important;
+    border-bottom: 2px solid #dee2e6 !important;
 }
 
-table#items td:last-child,
-table#items th:last-child {
+table#items tbody td:last-child {
     border-right: none !important;
+}
+
+table#items tbody tr:last-child td {
+    border-bottom: 2px solid #495057 !important;
 }
 
 table#items tbody tr:hover {
@@ -127,39 +141,73 @@ textarea.form-control {
 
 /* Enhanced table borders in notes and history sections */
 .card table {
-    border: 1px solid #495057 !important;
+    border: 2px solid #495057 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
 }
 
 .card table thead {
-    border-bottom: 2px solid #495057 !important;
+    border-bottom: 3px solid #495057 !important;
+}
+
+.card table thead th {
+    border-right: 2px solid #495057 !important;
+    border-bottom: 3px solid #495057 !important;
+}
+
+.card table thead th:last-child {
+    border-right: none !important;
 }
 
 .card table tbody tr {
     border-bottom: 2px solid #dee2e6 !important;
 }
 
-.card table td,
-.card table th {
-    border-right: 1px solid #dee2e6 !important;
+.card table tbody td {
+    border-right: 2px solid #495057 !important;
+    border-bottom: 2px solid #dee2e6 !important;
 }
 
-.card table td:last-child,
-.card table th:last-child {
+.card table tbody td:last-child {
     border-right: none !important;
+}
+
+.card table tbody tr:last-child td {
+    border-bottom: 2px solid #495057 !important;
 }
 
 /* Quote summary table borders */
 table.table-borderless {
-    border-collapse: collapse;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 2px solid #495057 !important;
 }
 
-table.table-borderless td {
-    border-bottom: 1px solid #dee2e6 !important;
+table.table-borderless thead {
+    border-bottom: 3px solid #495057 !important;
+}
+
+table.table-borderless thead th {
+    border-right: 2px solid #495057 !important;
+    border-bottom: 3px solid #495057 !important;
+}
+
+table.table-borderless thead th:last-child {
+    border-right: none !important;
+}
+
+table.table-borderless tbody td {
+    border-bottom: 2px solid #dee2e6 !important;
+    border-right: 2px solid #495057 !important;
     padding: 0.75rem !important;
 }
 
+table.table-borderless tbody td:last-child {
+    border-right: none !important;
+}
+
 table.table-borderless tr:last-child td {
-    border-bottom: none !important;
+    border-bottom: 2px solid #495057 !important;
 }
 
 /* Select2 dropdown enhancements */
