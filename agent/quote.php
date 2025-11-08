@@ -690,32 +690,34 @@ require_once "../includes/footer.php";
             var taxId = row.find('.item-tax').val() || 0;
             var submitBtn = row.find('button[type="submit"]');
 
-            console.log('Saving item:', {quote_id: quoteId, item_order: itemOrder, name: itemName, qty: qty, price: price});
+            // Validate required fields
+            if (!itemName || !qty || !price) {
+                alert('Please fill in Item, Qty, and Price');
+                return false;
+            }
 
-            $.ajax({
-                url: 'post.php',
-                type: 'POST',
-                data: {
-                    quote_id: quoteId,
-                    item_order: itemOrder,
-                    name: itemName,
-                    description: description,
-                    qty: qty,
-                    price: price,
-                    tax_id: taxId,
-                    add_quote_item: true
-                },
-                success: function(response) {
-                    console.log('Item saved successfully');
-                    submitBtn.prop('disabled', true);
-                    submitBtn.html('<i class="fa fa-check"></i>');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error saving item:', error);
-                    submitBtn.prop('disabled', false);
-                    submitBtn.html('<i class="fa fa-exclamation-circle text-danger"></i>');
-                    alert('Error saving item. Please try again.');
-                }
+            console.log('Saving item:', {quote_id: quoteId, item_order: itemOrder, name: itemName, qty: qty, price: price, tax_id: taxId});
+
+            $.post('post.php', {
+                quote_id: quoteId,
+                item_order: itemOrder,
+                name: itemName,
+                description: description,
+                qty: qty,
+                price: price,
+                tax_id: taxId,
+                add_quote_item: true
+            }, function(response) {
+                console.log('Save response received, reloading page...');
+                // Reload page to show saved item and any alerts
+                setTimeout(function() {
+                    location.reload();
+                }, 300);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error saving item:', textStatus, errorThrown);
+                submitBtn.prop('disabled', false);
+                submitBtn.html('<i class="fa fa-exclamation-circle text-danger"></i>');
+                alert('Error saving item: ' + textStatus);
             });
         }
 
