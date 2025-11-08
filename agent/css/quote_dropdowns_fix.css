@@ -34,3 +34,39 @@ table#items tbody tr form .form-control:focus {
     border-color: #80bdff !important;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
 }
+
+/* Quote items table column sizing */
+table#items thead th:nth-child(1),
+table#items tbody td:nth-child(1) {
+    width: 3%;
+}
+
+table#items thead th:nth-child(2),
+table#items tbody td:nth-child(2) {
+    width: 15%;
+}
+
+table#items thead th:nth-child(3),
+table#items tbody td:nth-child(3) {
+    width: 45%;
+}
+
+table#items thead th:nth-child(4),
+table#items tbody td:nth-child(4) {
+    width: 8%;
+}
+
+table#items thead th:nth-child(5),
+table#items tbody td:nth-child(5) {
+    width: 12%;
+}
+
+table#items thead th:nth-child(6),
+table#items tbody td:nth-child(6) {
+    width: 10%;
+}
+
+table#items thead th:nth-child(7),
+table#items tbody td:nth-child(7) {
+    width: 10%;
+}
