@@ -4033,6 +4033,16 @@ if (LATEST_DATABASE_VERSION > CURRENT_DATABASE_VERSION) {
         mysqli_query($mysqli, "UPDATE `settings` SET `config_current_database_version` = '2.3.6'");
     }
 
+    if (CURRENT_DATABASE_VERSION == '2.3.6') {
+        // Add item-level discount support for quotes/invoices
+        $alter_result = mysqli_query($mysqli, "ALTER TABLE `invoice_items` ADD COLUMN `item_discount` decimal(5,2) NOT NULL DEFAULT 0.00 AFTER `item_subtotal`");
+        if (!$alter_result) {
+            // Column might already exist - that's ok
+            error_log("Note: item_discount column add failed (may already exist): " . mysqli_error($mysqli));
+        }
+        mysqli_query($mysqli, "UPDATE `settings` SET `config_current_database_version` = '2.3.7'");
+    }
+
     // if (CURRENT_DATABASE_VERSION == '2.3.5') {
     //     // Insert queries here required to update to DB version 2.3.5
     //     // Then, update the database to the next sequential version
