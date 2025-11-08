@@ -708,11 +708,9 @@ require_once "../includes/footer.php";
                 tax_id: taxId,
                 add_quote_item: true
             }, function(response) {
-                console.log('Save response received, reloading page...');
-                // Reload page to show saved item and any alerts
-                setTimeout(function() {
-                    location.reload();
-                }, 300);
+                console.log('Item saved successfully, reloading page...');
+                // Reload page to show saved item as read-only row above, with new empty form below
+                location.reload();
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 console.error('Error saving item:', textStatus, errorThrown);
                 submitBtn.prop('disabled', false);

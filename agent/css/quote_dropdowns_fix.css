@@ -223,3 +223,13 @@ table.table-borderless tr:last-child td {
 .d-print-none .card {
     background-color: #ffffff;
 }
+
+/* Saved item row styling */
+table#items tbody tr.saved-item {
+    background-color: #f0f8f0;
+    opacity: 0.8;
+}
+
+table#items tbody tr.saved-item:hover {
+    background-color: #e8f5e8;
+}
