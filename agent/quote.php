@@ -397,60 +397,68 @@ if (isset($_GET['quote_id'])) {
 
                                     ?>
 
-                                    <tr class="d-print-none" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
-                                                                    echo "hidden";
-                                                                } ?>>
-                                        <form action="post.php" method="post" autocomplete="off">
-                                            <input type="hidden" name="quote_id" value="<?php echo $quote_id; ?>">
-                                            <input type="hidden" name="item_order" value="<?php
-                                            //find largest order number and add 1
-                                            $sql = mysqli_query($mysqli, "SELECT MAX(item_order) AS item_order FROM invoice_items WHERE item_quote_id = $quote_id");
-                                            $row = mysqli_fetch_array($sql);
-                                            $item_order = intval($row['item_order']) + 1;
-                                            echo $item_order;
-                                            ?>">
-                                            <td></td>
-                                            <td>
-                                                <input type="text" class="form-control" name="name" id="name" placeholder="Item" required>
-                                            </td>
-                                            <td>
-                                                <textarea class="form-control" rows="2" name="description" id="desc" placeholder="Enter a Description"></textarea>
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" id="qty" style="text-align: center;" name="qty" placeholder="Qty">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" id="price" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
-                                            </td>
-                                            <?php if (!$config_hide_tax_fields) { ?><td>
-                                                <select class="form-control select2" id="tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
-                                                    <option value="0">No Tax</option>
-                                                    <?php
+                                    <tbody id="quote-item-rows">
+                                        <tr class="d-print-none quote-item-row" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
+                                                                        echo "hidden";
+                                                                    } ?>>
+                                            <form class="quote-item-form" action="post.php" method="post" autocomplete="off">
+                                                <input type="hidden" name="quote_id" value="<?php echo $quote_id; ?>">
+                                                <input type="hidden" name="item_order" class="item-order" value="<?php
+                                                //find largest order number and add 1
+                                                $sql = mysqli_query($mysqli, "SELECT MAX(item_order) AS item_order FROM invoice_items WHERE item_quote_id = $quote_id");
+                                                $row = mysqli_fetch_array($sql);
+                                                $item_order = intval($row['item_order']) + 1;
+                                                echo $item_order;
+                                                ?>">
+                                                <td></td>
+                                                <td>
+                                                    <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-qty" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: center;" name="qty" placeholder="Qty">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
+                                                </td>
+                                                <?php if (!$config_hide_tax_fields) { ?><td>
+                                                    <select class="form-control select2 item-tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
+                                                        <option value="0">No Tax</option>
+                                                        <?php
 
-                                                    $taxes_sql = mysqli_query($mysqli, "SELECT tax_id, tax_name, tax_percent FROM taxes WHERE tax_archived_at IS NULL ORDER BY tax_name ASC");
-                                                    while ($row = mysqli_fetch_array($taxes_sql)) {
-                                                        $tax_id = intval($row['tax_id']);
-                                                        $tax_name = nullable_htmlentities($row['tax_name']);
-                                                        $tax_percent = floatval($row['tax_percent']);
-                                                    ?>
-                                                        <option value="<?php echo $tax_id; ?>"><?php echo "$tax_name $tax_percent%"; ?></option>
+                                                        $taxes_sql = mysqli_query($mysqli, "SELECT tax_id, tax_name, tax_percent FROM taxes WHERE tax_archived_at IS NULL ORDER BY tax_name ASC");
+                                                        while ($row = mysqli_fetch_array($taxes_sql)) {
+                                                            $tax_id = intval($row['tax_id']);
+                                                            $tax_name = nullable_htmlentities($row['tax_name']);
+                                                            $tax_percent = floatval($row['tax_percent']);
+                                                        ?>
+                                                            <option value="<?php echo $tax_id; ?>"><?php echo "$tax_name $tax_percent%"; ?></option>
 
-                                                    <?php
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-light text-success" type="submit" name="add_quote_item">
-                                                    <i class="fa fa-check"></i>
-                                                </button>
-                                            </td>
-                                        </form>
-                                    </tr>
-                                </tbody>
+                                                        <?php
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-light text-success" type="submit" name="add_quote_item">
+                                                        <i class="fa fa-check"></i>
+                                                    </button>
+                                                </td>
+                                            </form>
+                                        </tr>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
+                    <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
+                    <div style="padding: 15px 0 0 0; text-align: center;">
+                        <button type="button" class="btn btn-success btn-lg" id="add-item-row-btn">
+                            <i class="fas fa-plus mr-2"></i>Add Another Item
+                        </button>
+                    </div>
+                    <?php } ?>
                 </div>
             </div>
 
@@ -669,3 +677,81 @@ new Sortable(document.querySelector('table#items tbody'), {
 });
 </script>
 <link rel="stylesheet" href="css/quote_dropdowns_fix.css?v=<?php echo time(); ?>">
+
+<script>
+$(document).ready(function() {
+    let itemRowCounter = 1;
+
+    $('#add-item-row-btn').click(function() {
+        const quoteId = $('input[name="quote_id"]').val();
+        const lastOrder = parseInt($('.item-order:last').val() || 0) + 1;
+        const currencyCode = '<?php echo $quote_currency_code; ?>';
+
+        const newRow = `
+            <tr class="d-print-none quote-item-row">
+                <form class="quote-item-form" action="post.php" method="post" autocomplete="off">
+                    <input type="hidden" name="quote_id" value="${quoteId}">
+                    <input type="hidden" name="item_order" class="item-order" value="${lastOrder}">
+                    <td></td>
+                    <td>
+                        <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
+                    </td>
+                    <td>
+                        <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control item-qty" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: center;" name="qty" placeholder="Qty">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (${currencyCode})">
+                    </td>
+                    <td>
+                        <select class="form-control select2 item-tax" name="tax_id" required>
+                            <option value="0">No Tax</option>
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-light text-success" type="submit" name="add_quote_item">
+                            <i class="fa fa-check"></i>
+                        </button>
+                    </td>
+                </form>
+            </tr>
+        `;
+
+        $('#quote-item-rows').append(newRow);
+
+        // Re-initialize select2 for the new tax dropdown if it exists
+        if ($().select2) {
+            $('.item-tax:last').select2();
+        }
+
+        // Re-initialize autocomplete for the new name field
+        const availableProducts = <?php echo $json_products ?? '""' ?>;
+        if (availableProducts) {
+            $('.item-name:last').autocomplete({
+                source: function(request, response) {
+                    var term = request.term.toLowerCase();
+                    var filtered = availableProducts.filter(function(item) {
+                        return item.label.toLowerCase().indexOf(term) > -1 ||
+                               (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
+                               (item.description && item.description.toLowerCase().indexOf(term) > -1);
+                    });
+                    response(filtered);
+                },
+                select: function(event, ui) {
+                    $(this).closest('form').find('.item-description').val(ui.item.description);
+                    $(this).closest('form').find('.item-qty').val(1);
+                    $(this).closest('form').find('.item-price').val(ui.item.price);
+                    $(this).closest('form').find('.item-tax').val(ui.item.tax).change();
+                    return false;
+                }
+            }).autocomplete("instance")._renderItem = function(ul, item) {
+                return $("<li>")
+                    .append("<div><strong>" + item.display_label + "</strong><br><small>" + (item.description || '') + "</small></div>")
+                    .appendTo(ul);
+            };
+        }
+    });
+});
+</script>

@@ -43,12 +43,12 @@ table#items tbody td:nth-child(1) {
 
 table#items thead th:nth-child(2),
 table#items tbody td:nth-child(2) {
-    width: 15%;
+    width: 25%;
 }
 
 table#items thead th:nth-child(3),
 table#items tbody td:nth-child(3) {
-    width: 45%;
+    width: 40%;
 }
 
 table#items thead th:nth-child(4),
@@ -69,4 +69,31 @@ table#items tbody td:nth-child(6) {
 table#items thead th:nth-child(7),
 table#items tbody td:nth-child(7) {
     width: 10%;
+}
+
+/* Increased border contrast for items table */
+table#items {
+    border: 2px solid #495057 !important;
+}
+
+table#items thead {
+    border-bottom: 3px solid #495057 !important;
+}
+
+table#items tbody tr {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+table#items td,
+table#items th {
+    border-right: 2px solid #dee2e6 !important;
+}
+
+table#items td:last-child,
+table#items th:last-child {
+    border-right: none !important;
+}
+
+table#items tbody tr:hover {
+    background-color: #f0f0f0;
 }
