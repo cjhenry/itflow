@@ -753,36 +753,38 @@ if (isset($_GET['quote_id'])) {
                 </div>
 
                 <div class="col-sm-3 offset-sm-2">
-
-                    <table class="table table-hover mb-0">
-                        <tbody>
-                            <tr>
-                                <td>Product Subtotal:</td>
-                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $product_sub_total, $quote_currency_code); ?></td>
-                            </tr>
-                            <tr>
-                                <td>Services Subtotal:</td>
-                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $service_sub_total, $quote_currency_code); ?></td>
-                            </tr>
-                            <?php if ($quote_discount > 0) { ?>
-                                <tr>
-                                    <td>Discount:</td>
-                                    <td class="text-right">-<?php echo numfmt_format_currency($currency_format, $quote_discount, $quote_currency_code); ?></td>
-                                </tr>
-                            <?php } ?>
-                            <?php if ($total_tax > 0 && !$config_hide_tax_fields) { ?>
-                                <tr>
-                                    <td>Tax:</td>
-                                    <td class="text-right"><?php echo numfmt_format_currency($currency_format, $total_tax, $quote_currency_code); ?></td>
-                                </tr>
-                            <?php } ?>
-                            <tr class="h5 text-bold">
-                                <td>Total:</td>
-                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $quote_amount, $quote_currency_code); ?></td>
-                            </tr>
-                        </tbody>
-                    </table>
-
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Product Subtotal:</td>
+                                        <td class="text-right"><?php echo numfmt_format_currency($currency_format, $product_sub_total, $quote_currency_code); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Services Subtotal:</td>
+                                        <td class="text-right"><?php echo numfmt_format_currency($currency_format, $service_sub_total, $quote_currency_code); ?></td>
+                                    </tr>
+                                    <?php if ($quote_discount > 0) { ?>
+                                        <tr>
+                                            <td>Discount:</td>
+                                            <td class="text-right">-<?php echo numfmt_format_currency($currency_format, $quote_discount, $quote_currency_code); ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                    <?php if ($total_tax > 0 && !$config_hide_tax_fields) { ?>
+                                        <tr>
+                                            <td>Tax:</td>
+                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $total_tax, $quote_currency_code); ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                    <tr class="h5 text-bold">
+                                        <td>Total:</td>
+                                        <td class="text-right"><?php echo numfmt_format_currency($currency_format, $quote_amount, $quote_currency_code); ?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
