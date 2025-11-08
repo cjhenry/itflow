@@ -168,6 +168,9 @@ if (isset($_POST['add_quote_to_invoice'])) {
 
 if (isset($_POST['add_quote_item'])) {
 
+    error_log("DEBUG: add_quote_item POST received");
+    error_log("DEBUG: POST data: " . json_encode($_POST));
+
     enforceUserPermission('module_sales', 2);
 
     $quote_id = intval($_POST['quote_id']);
@@ -178,6 +181,8 @@ if (isset($_POST['add_quote_item'])) {
     $discount = isset($_POST['discount']) && $_POST['discount'] !== '' ? floatval($_POST['discount']) : 0;
     $tax_id = intval($_POST['tax_id'] ?? 0);
     $item_order = intval($_POST['item_order'] ?? 0);
+
+    error_log("DEBUG: Parsed values - qty: $qty, price: $price, discount: $discount, tax_id: $tax_id");
 
     $subtotal = $price * $qty;
     $discount_amount = ($discount > 0) ? $subtotal * ($discount / 100) : 0;

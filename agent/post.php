@@ -4,12 +4,20 @@
  * ITFlow - User GET/POST request handler
  */
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once "../config.php";
 require_once "../functions.php";
 require_once "../includes/check_login.php";
 
 // Define a variable that we can use to only allow running post files via inclusion (prevents people/bots poking them)
 define('FROM_POST_HANDLER', true);
+
+// Log all POST requests for debugging
+error_log("POST request to post.php - Module: " . ($_POST['module'] ?? 'unknown') . " - Action: " . (key($_POST) ?? 'none'));
 
 
 // Determine which files we should load
@@ -47,7 +55,12 @@ foreach (glob("post/*.php") as $user_module) {
         $module_match = !$module || $handler_module === $module || $handler_module === $module_singular;
 
         if ($module_match) {
-            require_once $user_module;
+            try {
+                require_once $user_module;
+            } catch (Exception $e) {
+                error_log("Error loading $user_module: " . $e->getMessage());
+                die("Error processing request: " . $e->getMessage());
+            }
         }
     }
 }

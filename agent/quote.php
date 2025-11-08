@@ -1098,6 +1098,9 @@ $(document).ready(function() {
                         <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (${currencyCode})">
                     </td>
                     <td>
+                        <input type="text" class="form-control item-discount" inputmode="numeric" pattern="[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="discount" placeholder="Discount %">
+                    </td>
+                    <td>
                         <select class="form-control select2 item-tax" name="tax_id" required>
                             <option value="0">No Tax</option>
                         </select>
@@ -1156,6 +1159,9 @@ $(document).ready(function() {
                     </td>
                     <td>
                         <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (${currencyCode})">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control item-discount" inputmode="numeric" pattern="[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="discount" placeholder="Discount %">
                     </td>
                     <td>
                         <select class="form-control select2 item-tax" name="tax_id" required>
