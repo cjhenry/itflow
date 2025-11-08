@@ -11,6 +11,7 @@ $item_name = nullable_htmlentities($row['item_name']);
 $item_description = nullable_htmlentities($row['item_description']);
 $item_quantity = floatval($row['item_quantity']);
 $item_price = floatval($row['item_price']);
+$item_discount = floatval($row['item_discount'] ?? 0);
 $item_created_at = nullable_htmlentities($row['item_created_at']);
 $tax_id = intval($row['item_tax_id']);
 $product_id = intval($row['item_product_id']);
@@ -72,6 +73,16 @@ ob_start();
                         <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" name="price" value="<?php echo number_format($item_price, 2, '.', ''); ?>" placeholder="0.00" required>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Discount</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-fw fa-percent"></i></span>
+                </div>
+                <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" name="discount" value="<?php echo number_format($item_discount, 2, '.', ''); ?>" placeholder="0.00">
             </div>
         </div>
 

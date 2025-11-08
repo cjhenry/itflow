@@ -391,6 +391,7 @@ if (isset($_GET['quote_id'])) {
                                         <th>Description</th>
                                         <th class="text-center">Qty</th>
                                         <th class="text-right">Unit Price</th>
+                                        <th class="text-right">Discount</th>
                                         <?php if (!$config_hide_tax_fields) { ?><th class="text-right">Tax</th><?php } ?>
                                         <th class="text-right">Amount</th>
                                         <th class="text-center"></th>
@@ -425,6 +426,7 @@ if (isset($_GET['quote_id'])) {
                                         $item_description = nullable_htmlentities($row['item_description']);
                                         $item_quantity = floatval($row['item_quantity']);
                                         $item_price = floatval($row['item_price']);
+                                        $item_discount = floatval($row['item_discount'] ?? 0);
                                         $item_tax = floatval($row['item_tax']);
                                         $item_total = floatval($row['item_total']);
                                         $item_created_at = nullable_htmlentities($row['item_created_at']);
@@ -464,6 +466,7 @@ if (isset($_GET['quote_id'])) {
                                             <td><?php echo nl2br($item_description); ?></td>
                                             <td class="text-center"><?php echo intval($item_quantity); ?></td>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
+                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_discount, $quote_currency_code); ?></td>
                                             <?php if (!$config_hide_tax_fields) { ?><td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td><?php } ?>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_total, $quote_currency_code); ?></td>
                                             <td class="text-center saved-checkmark">
@@ -584,6 +587,7 @@ if (isset($_GET['quote_id'])) {
                                         <th>Description</th>
                                         <th class="text-center">Qty</th>
                                         <th class="text-right">Unit Price</th>
+                                        <th class="text-right">Discount</th>
                                         <?php if (!$config_hide_tax_fields) { ?><th class="text-right">Tax</th><?php } ?>
                                         <th class="text-right">Amount</th>
                                         <th class="text-center"></th>
@@ -599,6 +603,7 @@ if (isset($_GET['quote_id'])) {
                                         $item_description = nullable_htmlentities($row['item_description']);
                                         $item_quantity = floatval($row['item_quantity']);
                                         $item_price = floatval($row['item_price']);
+                                        $item_discount = floatval($row['item_discount'] ?? 0);
                                         $item_tax = floatval($row['item_tax']);
                                         $item_total = floatval($row['item_total']);
                                         $item_created_at = nullable_htmlentities($row['item_created_at']);
@@ -638,6 +643,7 @@ if (isset($_GET['quote_id'])) {
                                             <td><?php echo nl2br($item_description); ?></td>
                                             <td class="text-center"><?php echo intval($item_quantity); ?></td>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
+                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_discount, $quote_currency_code); ?></td>
                                             <?php if (!$config_hide_tax_fields) { ?><td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td><?php } ?>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_total, $quote_currency_code); ?></td>
                                             <td class="text-center saved-checkmark">
