@@ -120,7 +120,8 @@ if (isset($_GET['quote_id'])) {
             'Product' AS type,
             '' AS category
         FROM products
-        WHERE product_archived_at IS NULL
+        WHERE product_type = 'product'
+        AND product_archived_at IS NULL
 
         UNION ALL
 
@@ -156,7 +157,8 @@ if (isset($_GET['quote_id'])) {
             'Product' AS type,
             '' AS category
         FROM products
-        WHERE product_archived_at IS NULL
+        WHERE product_type = 'product'
+        AND product_archived_at IS NULL
         ORDER BY product_name ASC
     ");
 
