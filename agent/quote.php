@@ -170,6 +170,29 @@ if (isset($_GET['quote_id'])) {
         $json_products_only = json_encode($products_list);
     }
 
+    // Services only for new item entry form
+    $services_only_sql = mysqli_query($mysqli, "
+        SELECT
+            service_name AS label,
+            CONCAT('[', service_category, '] ', service_name) AS display_label,
+            service_description AS description,
+            service_default_rate AS price,
+            0 AS tax,
+            'Service' AS type,
+            service_category AS category
+        FROM service_catalog
+        WHERE service_status = 'Active'
+        ORDER BY service_name ASC
+    ");
+
+    if (mysqli_num_rows($services_only_sql) > 0) {
+        $services_list = [];
+        while ($row = mysqli_fetch_array($services_only_sql)) {
+            $services_list[] = $row;
+        }
+        $json_services_only = json_encode($services_list);
+    }
+
     // Quote File Attachments
     $sql_quote_files = mysqli_query(
         $mysqli,
@@ -369,9 +392,26 @@ if (isset($_GET['quote_id'])) {
                                     <?php
 
                                     $total_tax = 0.00;
-                                    $sub_total = 0.00;
+                                    $product_sub_total = 0.00;
+                                    $service_sub_total = 0.00;
+                                    $product_items = [];
+                                    $service_items = [];
 
-                                    while ($row = mysqli_fetch_array($sql_items)) {
+                                    // Separate items into products and services
+                                    $temp_sql_items = mysqli_query($mysqli, "SELECT * FROM invoice_items WHERE item_quote_id = $quote_id ORDER BY item_order ASC");
+                                    while ($temp_row = mysqli_fetch_array($temp_sql_items)) {
+                                        $item_name = nullable_htmlentities($temp_row['item_name']);
+                                        // Check if item is a product or service
+                                        $product_check = mysqli_query($mysqli, "SELECT product_id FROM products WHERE product_name = '$item_name' AND product_archived_at IS NULL LIMIT 1");
+                                        if (mysqli_num_rows($product_check) > 0) {
+                                            $product_items[] = $temp_row;
+                                        } else {
+                                            $service_items[] = $temp_row;
+                                        }
+                                    }
+
+                                    // Display product items
+                                    foreach ($product_items as $row) {
                                         $item_id = intval($row['item_id']);
                                         $item_name = nullable_htmlentities($row['item_name']);
                                         $item_description = nullable_htmlentities($row['item_description']);
@@ -382,7 +422,7 @@ if (isset($_GET['quote_id'])) {
                                         $item_created_at = nullable_htmlentities($row['item_created_at']);
                                         $tax_id = intval($row['item_tax_id']);
                                         $total_tax = $item_tax + $total_tax;
-                                        $sub_total = $item_price * $item_quantity + $sub_total;
+                                        $product_sub_total = $item_price * $item_quantity + $product_sub_total;
                                         ?>
 
                                         <tr data-item-id="<?php echo $item_id; ?>">
@@ -521,6 +561,178 @@ if (isset($_GET['quote_id'])) {
                 </div>
             </div>
 
+            <!-- Services Card -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header text-bold" style="font-size: 1.1rem; padding: 12px 15px;">
+                            <i class="fas fa-wrench mr-2"></i>Services
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="services-items">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Description</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-right">Unit Price</th>
+                                        <?php if (!$config_hide_tax_fields) { ?><th class="text-right">Tax</th><?php } ?>
+                                        <th class="text-right">Amount</th>
+                                        <th class="text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+
+                                    // Display service items
+                                    foreach ($service_items as $row) {
+                                        $item_id = intval($row['item_id']);
+                                        $item_name = nullable_htmlentities($row['item_name']);
+                                        $item_description = nullable_htmlentities($row['item_description']);
+                                        $item_quantity = floatval($row['item_quantity']);
+                                        $item_price = floatval($row['item_price']);
+                                        $item_tax = floatval($row['item_tax']);
+                                        $item_total = floatval($row['item_total']);
+                                        $item_created_at = nullable_htmlentities($row['item_created_at']);
+                                        $tax_id = intval($row['item_tax_id']);
+                                        $total_tax = $item_tax + $total_tax;
+                                        $service_sub_total = $item_price * $item_quantity + $service_sub_total;
+                                        ?>
+
+                                        <tr data-item-id="<?php echo $item_id; ?>">
+                                            <td>
+                                                <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
+                                                    <div class="d-flex align-items-center">
+                                                        <button type="button" class="btn btn-sm btn-link drag-handle mr-2">
+                                                            <i class="fas fa-bars text-muted"></i>
+                                                        </button>
+                                                        <span><?php echo $item_name; ?></span>
+                                                        <div class="dropdown ml-auto">
+                                                            <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item ajax-modal" href="#"
+                                                                    data-modal-url="modals/invoice/item_edit.php?id=<?= $item_id ?>">
+                                                                    <i class="fa fa-fw fa-edit mr-2"></i>Edit
+                                                                </a>
+                                                                <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item text-danger confirm-link" href="post.php?delete_quote_item=<?php echo $item_id; ?>">
+                                                                    <i class="fa fa-fw fa-trash mr-2"></i>Delete
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php } else { ?>
+                                                    <?php echo $item_name; ?>
+                                                <?php } ?>
+                                            </td>
+                                            <td><?php echo nl2br($item_description); ?></td>
+                                            <td class="text-center"><?php echo intval($item_quantity); ?></td>
+                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
+                                            <?php if (!$config_hide_tax_fields) { ?><td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td><?php } ?>
+                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_total, $quote_currency_code); ?></td>
+                                            <td class="text-center saved-checkmark">
+                                                <i class="fa fa-check text-success"></i>
+                                            </td>
+                                        </tr>
+
+                                    <?php
+
+                                    }
+
+                                    ?>
+
+                                    <tbody id="quote-service-item-rows">
+                                        <tr class="d-print-none quote-item-row" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
+                                                                        echo "hidden";
+                                                                    } ?>>
+                                            <form class="quote-service-item-form" action="post.php" method="post" autocomplete="off">
+                                                <input type="hidden" name="quote_id" value="<?php echo $quote_id; ?>">
+                                                <input type="hidden" name="item_order" class="item-order" value="<?php
+                                                //find largest order number and add 1
+                                                $sql = mysqli_query($mysqli, "SELECT MAX(item_order) AS item_order FROM invoice_items WHERE item_quote_id = $quote_id");
+                                                $row = mysqli_fetch_array($sql);
+                                                $item_order = intval($row['item_order']) + 1;
+                                                echo $item_order;
+                                                ?>">
+                                                <td>
+                                                    <select class="form-control select2 item-name service-item-name" name="name" required>
+                                                        <option value="">Select a Service...</option>
+                                                        <?php
+                                                        $services_dropdown_sql = mysqli_query($mysqli, "
+                                                            SELECT service_name, service_category, service_description, service_default_rate
+                                                            FROM service_catalog
+                                                            WHERE service_status = 'Active'
+                                                            ORDER BY service_name ASC
+                                                        ");
+                                                        if (mysqli_num_rows($services_dropdown_sql) > 0) {
+                                                            while ($row = mysqli_fetch_array($services_dropdown_sql)) {
+                                                                $service_name = nullable_htmlentities($row['service_name']);
+                                                                $service_category = nullable_htmlentities($row['service_category']);
+                                                                $service_description = nullable_htmlentities($row['service_description']);
+                                                                $service_default_rate = floatval($row['service_default_rate']);
+                                                        ?>
+                                                                <option value="<?php echo $service_name; ?>" data-description="<?php echo $service_description; ?>" data-price="<?php echo $service_default_rate; ?>" data-tax="0">
+                                                                    [<?php echo $service_category; ?>] <?php echo $service_name; ?>
+                                                                </option>
+                                                        <?php
+                                                            }
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-qty" inputmode="numeric" pattern="[0-9]*" style="text-align: center;" name="qty" placeholder="Qty">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
+                                                </td>
+                                                <?php if (!$config_hide_tax_fields) { ?><td>
+                                                    <select class="form-control select2 item-tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
+                                                        <option value="0">No Tax</option>
+                                                        <?php
+
+                                                        $taxes_sql = mysqli_query($mysqli, "SELECT tax_id, tax_name, tax_percent FROM taxes WHERE tax_archived_at IS NULL ORDER BY tax_name ASC");
+                                                        while ($row = mysqli_fetch_array($taxes_sql)) {
+                                                            $tax_id = intval($row['tax_id']);
+                                                            $tax_name = nullable_htmlentities($row['tax_name']);
+                                                            $tax_percent = floatval($row['tax_percent']);
+                                                        ?>
+                                                            <option value="<?php echo $tax_id; ?>"><?php echo "$tax_name $tax_percent%"; ?></option>
+
+                                                        <?php
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </td>
+                                                <td class="text-right">
+                                                    <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-light text-success" type="submit" name="add_quote_item" title="Click to save, or auto-saves when service selected">
+                                                        <i class="fa fa-check"></i>
+                                                    </button>
+                                                </td>
+                                            </form>
+                                        </tr>
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
+                    <div style="padding: 15px 0 0 0; text-align: center;">
+                        <button type="button" class="btn btn-success btn-lg" id="add-service-item-row-btn">
+                            <i class="fas fa-plus mr-2"></i>Add Another Service
+                        </button>
+                    </div>
+                    <?php } ?>
+                </div>
+            </div>
+
             <div class="row mb-3">
                 <div class="col-sm-7">
                     <div class="card">
@@ -541,12 +753,16 @@ if (isset($_GET['quote_id'])) {
                 </div>
 
                 <div class="col-sm-3 offset-sm-2">
-                    
+
                     <table class="table table-hover mb-0">
                         <tbody>
                             <tr>
-                                <td>Subtotal:</td>
-                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $sub_total, $quote_currency_code); ?></td>
+                                <td>Product Subtotal:</td>
+                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $product_sub_total, $quote_currency_code); ?></td>
+                            </tr>
+                            <tr>
+                                <td>Services Subtotal:</td>
+                                <td class="text-right"><?php echo numfmt_format_currency($currency_format, $service_sub_total, $quote_currency_code); ?></td>
                             </tr>
                             <?php if ($quote_discount > 0) { ?>
                                 <tr>
@@ -566,7 +782,7 @@ if (isset($_GET['quote_id'])) {
                             </tr>
                         </tbody>
                     </table>
-                    
+
                 </div>
             </div>
 
@@ -884,6 +1100,66 @@ $(document).ready(function() {
         if ($().select2) {
             $('.item-name:last').select2({
                 placeholder: 'Select a Product...',
+                allowClear: true
+            });
+            $('.item-tax:last').select2();
+        }
+    });
+
+    $('#add-service-item-row-btn').click(function() {
+        const quoteId = $('input[name="quote_id"]').val();
+        const lastOrder = parseInt($('.item-order:last').val() || 0) + 1;
+        const currencyCode = '<?php echo $quote_currency_code; ?>';
+
+        // Get the service options from the first dropdown
+        let serviceOptions = '';
+        $('#quote-service-item-rows select.service-item-name:first option').each(function() {
+            serviceOptions += `<option value="${$(this).val()}" data-description="${$(this).data('description')}" data-price="${$(this).data('price')}" data-tax="${$(this).data('tax')}">${$(this).text()}</option>`;
+        });
+
+        const newRow = `
+            <tr class="d-print-none quote-item-row">
+                <form class="quote-service-item-form" action="post.php" method="post" autocomplete="off">
+                    <input type="hidden" name="quote_id" value="${quoteId}">
+                    <input type="hidden" name="item_order" class="item-order" value="${lastOrder}">
+                    <td>
+                        <select class="form-control select2 item-name service-item-name" name="name" required>
+                            <option value="">Select a Service...</option>
+                            ${serviceOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control item-qty" inputmode="numeric" pattern="[0-9]*" style="text-align: center;" name="qty" placeholder="Qty">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (${currencyCode})">
+                    </td>
+                    <td>
+                        <select class="form-control select2 item-tax" name="tax_id" required>
+                            <option value="0">No Tax</option>
+                        </select>
+                    </td>
+                    <td class="text-right">
+                        <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-light text-success" type="submit" name="add_quote_item" title="Click to save, or auto-saves when service selected">
+                            <i class="fa fa-check"></i>
+                        </button>
+                    </td>
+                </form>
+            </tr>
+        `;
+
+        $('#quote-service-item-rows').append(newRow);
+
+        // Re-initialize select2 for the new dropdowns
+        if ($().select2) {
+            $('.service-item-name:last').select2({
+                placeholder: 'Select a Service...',
                 allowClear: true
             });
             $('.item-tax:last').select2();
