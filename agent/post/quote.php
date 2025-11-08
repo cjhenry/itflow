@@ -180,7 +180,8 @@ if (isset($_POST['add_quote_item'])) {
     $item_order = intval($_POST['item_order']);
 
     $subtotal = $price * $qty;
-    $subtotal_after_discount = $subtotal - $discount;
+    $discount_amount = $subtotal * ($discount / 100);
+    $subtotal_after_discount = $subtotal - $discount_amount;
 
     if ($tax_id > 0) {
         $sql = mysqli_query($mysqli,"SELECT * FROM taxes WHERE tax_id = $tax_id");

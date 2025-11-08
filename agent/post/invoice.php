@@ -631,7 +631,8 @@ if (isset($_POST['edit_item'])) {
     $service_id = intval($_POST['service_id'] ?? 0);
 
     $subtotal = $price * $qty;
-    $subtotal_after_discount = $subtotal - $discount;
+    $discount_amount = $subtotal * ($discount / 100);
+    $subtotal_after_discount = $subtotal - $discount_amount;
 
     if ($tax_id > 0) {
         $sql = mysqli_query($mysqli,"SELECT * FROM taxes WHERE tax_id = $tax_id");
