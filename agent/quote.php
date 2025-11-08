@@ -497,7 +497,7 @@ if (isset($_GET['quote_id'])) {
                                                     <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
                                                 </td>
                                                 <td class="text-center">
-                                                    <button class="btn btn-light text-success" type="submit" name="add_quote_item">
+                                                    <button class="btn btn-light text-success" type="submit" name="add_quote_item" title="Click to save, or auto-saves when product selected">
                                                         <i class="fa fa-check"></i>
                                                     </button>
                                                 </td>
@@ -704,18 +704,41 @@ require_once "../includes/footer.php";
 
             // Calculate amount after setting values
             calculateAmount(row);
+
+            // Disable the submit button and show saving state
+            var submitBtn = row.find('button[type="submit"]');
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<i class="fa fa-hourglass-half"></i>');
+
+            // Auto-submit the form after 500ms to save to database
+            setTimeout(function() {
+                var submitBtn = row.find('button[type="submit"]');
+                if (submitBtn.length > 0) {
+                    submitBtn.click();
+                }
+            }, 500);
         });
 
         // Handle qty change and input
         $(document).on('change input', '.item-qty', function() {
             var row = $(this).closest('tr');
             calculateAmount(row);
+
+            // Show save button prompt
+            var submitBtn = row.find('button[type="submit"]');
+            submitBtn.prop('disabled', false);
+            submitBtn.html('<i class="fa fa-check"></i> Save');
         });
 
         // Handle price change and input
         $(document).on('change input', '.item-price', function() {
             var row = $(this).closest('tr');
             calculateAmount(row);
+
+            // Show save button prompt
+            var submitBtn = row.find('button[type="submit"]');
+            submitBtn.prop('disabled', false);
+            submitBtn.html('<i class="fa fa-check"></i> Save');
         });
 
         // Initialize Select2 for product dropdowns
@@ -799,7 +822,7 @@ $(document).ready(function() {
                         <input type="text" class="form-control item-amount" inputmode="numeric" style="text-align: right;" name="amount" placeholder="0.00" readonly>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-light text-success" type="submit" name="add_quote_item">
+                        <button class="btn btn-light text-success" type="submit" name="add_quote_item" title="Click to save, or auto-saves when product selected">
                             <i class="fa fa-check"></i>
                         </button>
                     </td>
