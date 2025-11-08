@@ -560,13 +560,6 @@ if (isset($_GET['quote_id'])) {
                             </div>
                         </div>
                     </div>
-                    <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
-                    <div style="padding: 15px 0 0 0; text-align: center;">
-                        <button type="button" class="btn btn-success btn-lg" id="add-item-row-btn">
-                            <i class="fas fa-plus mr-2"></i>Add Another Product
-                        </button>
-                    </div>
-                    <?php } ?>
                 </div>
             </div>
 
@@ -739,13 +732,6 @@ if (isset($_GET['quote_id'])) {
                             </div>
                         </div>
                     </div>
-                    <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
-                    <div style="padding: 15px 0 0 0; text-align: center;">
-                        <button type="button" class="btn btn-success btn-lg" id="add-service-item-row-btn">
-                            <i class="fas fa-plus mr-2"></i>Add Another Service
-                        </button>
-                    </div>
-                    <?php } ?>
                 </div>
             </div>
 
