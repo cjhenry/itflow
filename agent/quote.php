@@ -376,6 +376,11 @@ if (isset($_GET['quote_id'])) {
                     <div class="card">
                         <div class="card-header text-bold" style="font-size: 1.1rem; padding: 12px 15px;">
                             <i class="fas fa-box mr-2"></i>Products
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="items">
@@ -569,6 +574,11 @@ if (isset($_GET['quote_id'])) {
                     <div class="card">
                         <div class="card-header text-bold" style="font-size: 1.1rem; padding: 12px 15px;">
                             <i class="fas fa-wrench mr-2"></i>Services
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="services-items">
