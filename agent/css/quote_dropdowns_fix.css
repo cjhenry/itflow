@@ -82,10 +82,6 @@ table#items thead th {
     border-bottom: 3px solid #495057 !important;
 }
 
-table#items thead th:last-child {
-    border-right: none !important;
-}
-
 table#items tbody tr {
     border-bottom: 2px solid #dee2e6 !important;
 }
@@ -93,10 +89,6 @@ table#items tbody tr {
 table#items tbody td {
     border-right: 2px solid #495057 !important;
     border-bottom: 2px solid #dee2e6 !important;
-}
-
-table#items tbody td:last-child {
-    border-right: none !important;
 }
 
 table#items tbody tr:last-child td {
@@ -150,10 +142,6 @@ textarea.form-control {
     border-bottom: 3px solid #495057 !important;
 }
 
-.card table thead th:last-child {
-    border-right: none !important;
-}
-
 .card table tbody tr {
     border-bottom: 2px solid #dee2e6 !important;
 }
@@ -161,10 +149,6 @@ textarea.form-control {
 .card table tbody td {
     border-right: 2px solid #495057 !important;
     border-bottom: 2px solid #dee2e6 !important;
-}
-
-.card table tbody td:last-child {
-    border-right: none !important;
 }
 
 .card table tbody tr:last-child td {
@@ -187,18 +171,10 @@ table.table-borderless thead th {
     border-bottom: 3px solid #495057 !important;
 }
 
-table.table-borderless thead th:last-child {
-    border-right: none !important;
-}
-
 table.table-borderless tbody td {
     border-bottom: 2px solid #dee2e6 !important;
     border-right: 2px solid #495057 !important;
     padding: 0.75rem !important;
-}
-
-table.table-borderless tbody td:last-child {
-    border-right: none !important;
 }
 
 table.table-borderless tr:last-child td {
