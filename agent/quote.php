@@ -532,6 +532,9 @@ if (isset($_GET['quote_id'])) {
                                                 <td>
                                                     <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
                                                 </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-discount" inputmode="numeric" pattern="[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="discount" placeholder="Discount %">
+                                                </td>
                                                 <?php if (!$config_hide_tax_fields) { ?><td>
                                                     <select class="form-control select2 item-tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
                                                         <option value="0">No Tax</option>
@@ -708,6 +711,9 @@ if (isset($_GET['quote_id'])) {
                                                 </td>
                                                 <td>
                                                     <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control item-discount" inputmode="numeric" pattern="[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="discount" placeholder="Discount %">
                                                 </td>
                                                 <?php if (!$config_hide_tax_fields) { ?><td>
                                                     <select class="form-control select2 item-tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
