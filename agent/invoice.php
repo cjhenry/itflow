@@ -54,6 +54,7 @@ if (isset($_GET['invoice_id'])) {
     $invoice_note = nullable_htmlentities($row['invoice_note']);
     $invoice_url_key = nullable_htmlentities($row['invoice_url_key']);
     $invoice_created_at = nullable_htmlentities($row['invoice_created_at']);
+    $invoice_quote_id = intval($row['invoice_quote_id']);
     $category_id = intval($row['invoice_category_id']);
     $client_id = intval($row['client_id']);
     $client_name = nullable_htmlentities($row['client_name']);
@@ -440,7 +441,7 @@ if (isset($_GET['invoice_id'])) {
                                     ?>
                                     <tr data-item-id="<?php echo $item_id; ?>">
                                         <td class="d-print-none">
-                                            <?php if ($invoice_status !== "Paid" && $invoice_status !== "Cancelled") { ?>
+                                            <?php if ($invoice_status !== "Paid" && $invoice_status !== "Cancelled" && $invoice_quote_id == 0) { ?>
 
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-link drag-handle">
@@ -474,7 +475,7 @@ if (isset($_GET['invoice_id'])) {
                                     <?php
                                 }
                                 ?>
-                                <tr class="d-print-none" <?php if ($invoice_status == "Paid" || $invoice_status == "Cancelled" || lookupUserPermission("module_sales") <= 1) { echo "hidden"; } ?>>
+                                <tr class="d-print-none" <?php if ($invoice_status == "Paid" || $invoice_status == "Cancelled" || lookupUserPermission("module_sales") <= 1 || $invoice_quote_id > 0) { echo "hidden"; } ?>>
                                     <form action="post.php" method="post" autocomplete="off">
                                         <input type="hidden" name="invoice_id" value="<?= $invoice_id ?>">
                                         <input type="hidden" id="product_id" name="product_id" value="<?= $item_product_id ?? 0 ?>">
