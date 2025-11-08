@@ -679,6 +679,46 @@ require_once "../includes/footer.php";
 
 <script>
     $(function() {
+        // Function to save quote item via AJAX
+        function saveQuoteItem(row) {
+            var quoteId = $('input[name="quote_id"]').val();
+            var itemOrder = row.find('.item-order').val();
+            var itemName = row.find('.item-name').val();
+            var description = row.find('.item-description').val();
+            var qty = row.find('.item-qty').val();
+            var price = row.find('.item-price').val();
+            var taxId = row.find('.item-tax').val() || 0;
+            var submitBtn = row.find('button[type="submit"]');
+
+            console.log('Saving item:', {quote_id: quoteId, item_order: itemOrder, name: itemName, qty: qty, price: price});
+
+            $.ajax({
+                url: 'post.php',
+                type: 'POST',
+                data: {
+                    quote_id: quoteId,
+                    item_order: itemOrder,
+                    name: itemName,
+                    description: description,
+                    qty: qty,
+                    price: price,
+                    tax_id: taxId,
+                    add_quote_item: true
+                },
+                success: function(response) {
+                    console.log('Item saved successfully');
+                    submitBtn.prop('disabled', true);
+                    submitBtn.html('<i class="fa fa-check"></i>');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving item:', error);
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html('<i class="fa fa-exclamation-circle text-danger"></i>');
+                    alert('Error saving item. Please try again.');
+                }
+            });
+        }
+
         // Function to calculate amount (qty × price)
         function calculateAmount(row) {
             var qty = parseFloat(row.find('.item-qty').val()) || 0;
@@ -710,12 +750,9 @@ require_once "../includes/footer.php";
             submitBtn.prop('disabled', true);
             submitBtn.html('<i class="fa fa-hourglass-half"></i>');
 
-            // Auto-submit the form after 500ms to save to database
+            // Auto-save after 500ms using AJAX
             setTimeout(function() {
-                var submitBtn = row.find('button[type="submit"]');
-                if (submitBtn.length > 0) {
-                    submitBtn.click();
-                }
+                saveQuoteItem(row);
             }, 500);
         });
 
@@ -728,6 +765,13 @@ require_once "../includes/footer.php";
             var submitBtn = row.find('button[type="submit"]');
             submitBtn.prop('disabled', false);
             submitBtn.html('<i class="fa fa-check"></i> Save');
+        });
+
+        // Handle qty save button click
+        $(document).on('click', 'button[type="submit"][name="add_quote_item"]', function(e) {
+            e.preventDefault();
+            var row = $(this).closest('tr');
+            saveQuoteItem(row);
         });
 
         // Handle price change and input
