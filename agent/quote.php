@@ -382,7 +382,8 @@ if (isset($_GET['quote_id'])) {
                                 </button>
                             </div>
                         </div>
-                        <div class="table-responsive">
+                        <div class="card-body">
+                            <div class="table-responsive">
                             <table class="table table-hover mb-0" id="items">
                                 <thead class="bg-light">
                                     <tr>
@@ -556,6 +557,7 @@ if (isset($_GET['quote_id'])) {
                                         </tr>
                                     </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                     <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
@@ -580,7 +582,8 @@ if (isset($_GET['quote_id'])) {
                                 </button>
                             </div>
                         </div>
-                        <div class="table-responsive">
+                        <div class="card-body">
+                            <div class="table-responsive">
                             <table class="table table-hover mb-0" id="services-items">
                                 <thead class="bg-light">
                                     <tr>
@@ -733,6 +736,7 @@ if (isset($_GET['quote_id'])) {
                                         </tr>
                                     </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                     <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
