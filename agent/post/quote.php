@@ -180,14 +180,18 @@ if (isset($_POST['add_quote_item'])) {
     $item_order = intval($_POST['item_order']);
 
     $subtotal = $price * $qty;
-    $discount_amount = $subtotal * ($discount / 100);
+    $discount_amount = ($discount > 0) ? $subtotal * ($discount / 100) : 0;
     $subtotal_after_discount = $subtotal - $discount_amount;
 
     if ($tax_id > 0) {
         $sql = mysqli_query($mysqli,"SELECT * FROM taxes WHERE tax_id = $tax_id");
-        $row = mysqli_fetch_array($sql);
-        $tax_percent = floatval($row['tax_percent']);
-        $tax_amount = $subtotal_after_discount * $tax_percent / 100;
+        if ($sql && mysqli_num_rows($sql) > 0) {
+            $row = mysqli_fetch_array($sql);
+            $tax_percent = floatval($row['tax_percent']);
+            $tax_amount = $subtotal_after_discount * $tax_percent / 100;
+        } else {
+            $tax_amount = 0;
+        }
     }else{
         $tax_amount = 0;
     }
