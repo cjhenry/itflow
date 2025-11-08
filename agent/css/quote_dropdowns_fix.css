@@ -70,20 +70,27 @@ table#items thead th:nth-child(5),
 table#items tbody td:nth-child(5),
 table#services-items thead th:nth-child(5),
 table#services-items tbody td:nth-child(5) {
-    width: 8%;
+    width: 7%;
 }
 
 table#items thead th:nth-child(6),
 table#items tbody td:nth-child(6),
 table#services-items thead th:nth-child(6),
 table#services-items tbody td:nth-child(6) {
-    width: 10%;
+    width: 8%;
 }
 
 table#items thead th:nth-child(7),
 table#items tbody td:nth-child(7),
 table#services-items thead th:nth-child(7),
 table#services-items tbody td:nth-child(7) {
+    width: 10%;
+}
+
+table#items thead th:nth-child(8),
+table#items tbody td:nth-child(8),
+table#services-items thead th:nth-child(8),
+table#services-items tbody td:nth-child(8) {
     width: 10%;
 }
 
