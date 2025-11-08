@@ -437,7 +437,31 @@ if (isset($_GET['quote_id'])) {
                                                 echo $item_order;
                                                 ?>">
                                                 <td>
-                                                    <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
+                                                    <select class="form-control select2 item-name" name="name" required>
+                                                        <option value="">Select a Product...</option>
+                                                        <?php
+                                                        if (mysqli_num_rows($products_only_sql) > 0) {
+                                                            $products_only_sql = mysqli_query($mysqli, "
+                                                                SELECT product_id, product_name, product_description, product_price, product_tax_id
+                                                                FROM products
+                                                                WHERE product_archived_at IS NULL
+                                                                ORDER BY product_name ASC
+                                                            ");
+                                                            while ($row = mysqli_fetch_array($products_only_sql)) {
+                                                                $product_id = intval($row['product_id']);
+                                                                $product_name = nullable_htmlentities($row['product_name']);
+                                                                $product_description = nullable_htmlentities($row['product_description']);
+                                                                $product_price = floatval($row['product_price']);
+                                                                $product_tax_id = intval($row['product_tax_id']);
+                                                        ?>
+                                                                <option value="<?php echo $product_name; ?>" data-description="<?php echo $product_description; ?>" data-price="<?php echo $product_price; ?>" data-tax="<?php echo $product_tax_id; ?>">
+                                                                    <?php echo $product_name; ?>
+                                                                </option>
+                                                        <?php
+                                                            }
+                                                        }
+                                                        ?>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
@@ -647,37 +671,36 @@ require_once "../includes/footer.php";
 
 ?>
 
-<!-- JSON Autocomplete / type ahead -->
-<!-- //TODO: Move to js/ -->
-<link rel="stylesheet" href="../plugins/jquery-ui/jquery-ui.min.css">
-<script src="../plugins/jquery-ui/jquery-ui.min.js"></script>
 <script>
     $(function() {
-        var availableProductsOnly = <?php echo $json_products_only ?? '""' ?>;
+        // Handle product selection change
+        $(document).on('change', '.item-name', function() {
+            var selectedOption = $(this).find(':selected');
+            var description = selectedOption.data('description');
+            var price = selectedOption.data('price');
+            var tax = selectedOption.data('tax');
 
-        // Setup autocomplete for product entry form
-        $(".item-name").autocomplete({
-            source: function(request, response) {
-                var term = request.term.toLowerCase();
-                var filtered = availableProductsOnly.filter(function(item) {
-                    return item.label.toLowerCase().indexOf(term) > -1 ||
-                           (item.description && item.description.toLowerCase().indexOf(term) > -1);
-                });
-                response(filtered);
-            },
-            select: function(event, ui) {
-                $(this).val(ui.item.label); // Item name field
-                $(this).closest('form').find('.item-description').val(ui.item.description); // Item description field
-                $(this).closest('form').find('.item-qty').val(1); // Quantity field
-                $(this).closest('form').find('.item-price').val(ui.item.price); // Price field
-                $(this).closest('form').find('.item-tax').val(ui.item.tax); // Tax field
-                return false;
+            var form = $(this).closest('form');
+            form.find('.item-description').val(description);
+            form.find('.item-qty').val(1);
+            form.find('.item-price').val(price);
+            form.find('.item-tax').val(tax).change();
+        });
+
+        // Initialize Select2 for product dropdowns
+        $(document).on('select2:init', '.item-name', function() {
+            if ($().select2) {
+                $(this).select2();
             }
-        }).autocomplete("instance")._renderItem = function(ul, item) {
-            return $("<li>")
-                .append("<div><strong>" + item.display_label + "</strong><br><small>" + (item.description || '') + "</small></div>")
-                .appendTo(ul);
-        };
+        });
+
+        // Initialize on page load
+        if ($().select2) {
+            $('.item-name').select2({
+                placeholder: 'Select a Product...',
+                allowClear: true
+            });
+        }
     });
 </script>
 
@@ -705,12 +728,16 @@ new Sortable(document.querySelector('table#items tbody'), {
 
 <script>
 $(document).ready(function() {
-    let itemRowCounter = 1;
-
     $('#add-item-row-btn').click(function() {
         const quoteId = $('input[name="quote_id"]').val();
         const lastOrder = parseInt($('.item-order:last').val() || 0) + 1;
         const currencyCode = '<?php echo $quote_currency_code; ?>';
+
+        // Get the product options from the first dropdown
+        let productOptions = '';
+        $('#quote-item-rows select.item-name:first option').each(function() {
+            productOptions += `<option value="${$(this).val()}" data-description="${$(this).data('description')}" data-price="${$(this).data('price')}" data-tax="${$(this).data('tax')}">${$(this).text()}</option>`;
+        });
 
         const newRow = `
             <tr class="d-print-none quote-item-row">
@@ -718,7 +745,10 @@ $(document).ready(function() {
                     <input type="hidden" name="quote_id" value="${quoteId}">
                     <input type="hidden" name="item_order" class="item-order" value="${lastOrder}">
                     <td>
-                        <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
+                        <select class="form-control select2 item-name" name="name" required>
+                            <option value="">Select a Product...</option>
+                            ${productOptions}
+                        </select>
                     </td>
                     <td>
                         <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
@@ -745,35 +775,13 @@ $(document).ready(function() {
 
         $('#quote-item-rows').append(newRow);
 
-        // Re-initialize select2 for the new tax dropdown if it exists
+        // Re-initialize select2 for the new dropdowns
         if ($().select2) {
+            $('.item-name:last').select2({
+                placeholder: 'Select a Product...',
+                allowClear: true
+            });
             $('.item-tax:last').select2();
-        }
-
-        // Re-initialize autocomplete for the new name field (products only)
-        const availableProductsOnly = <?php echo $json_products_only ?? '""' ?>;
-        if (availableProductsOnly) {
-            $('.item-name:last').autocomplete({
-                source: function(request, response) {
-                    var term = request.term.toLowerCase();
-                    var filtered = availableProductsOnly.filter(function(item) {
-                        return item.label.toLowerCase().indexOf(term) > -1 ||
-                               (item.description && item.description.toLowerCase().indexOf(term) > -1);
-                    });
-                    response(filtered);
-                },
-                select: function(event, ui) {
-                    $(this).closest('form').find('.item-description').val(ui.item.description);
-                    $(this).closest('form').find('.item-qty').val(1);
-                    $(this).closest('form').find('.item-price').val(ui.item.price);
-                    $(this).closest('form').find('.item-tax').val(ui.item.tax).change();
-                    return false;
-                }
-            }).autocomplete("instance")._renderItem = function(ul, item) {
-                return $("<li>")
-                    .append("<div><strong>" + item.display_label + "</strong><br><small>" + (item.description || '') + "</small></div>")
-                    .appendTo(ul);
-            };
         }
     });
 });
