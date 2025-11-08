@@ -109,11 +109,37 @@ if (isset($_GET['quote_id'])) {
         $quote_badge_color = "secondary";
     }
 
-    //Product autocomplete
-    $products_sql = mysqli_query($mysqli, "SELECT product_name AS label, product_description AS description, product_price AS price, product_tax_id AS tax FROM products WHERE product_archived_at IS NULL");
+    //Product & Service autocomplete - combine products and service catalog
+    $items_sql = mysqli_query($mysqli, "
+        SELECT
+            product_name AS label,
+            CONCAT('[Product] ', product_name) AS display_label,
+            product_description AS description,
+            product_price AS price,
+            product_tax_id AS tax,
+            'Product' AS type,
+            '' AS category
+        FROM products
+        WHERE product_archived_at IS NULL
 
-    if (mysqli_num_rows($products_sql) > 0) {
-        while ($row = mysqli_fetch_array($products_sql)) {
+        UNION ALL
+
+        SELECT
+            service_name AS label,
+            CONCAT('[', service_category, '] ', service_name) AS display_label,
+            service_description AS description,
+            service_default_rate AS price,
+            0 AS tax,
+            'Service' AS type,
+            service_category AS category
+        FROM service_catalog
+        WHERE service_status = 'Active'
+
+        ORDER BY label ASC
+    ");
+
+    if (mysqli_num_rows($items_sql) > 0) {
+        while ($row = mysqli_fetch_array($items_sql)) {
             $products[] = $row;
         }
         $json_products = json_encode($products);
@@ -307,7 +333,7 @@ if (isset($_GET['quote_id'])) {
                                         <th>Description</th>
                                         <th class="text-center">Qty</th>
                                         <th class="text-right">Unit Price</th>
-                                        <th class="text-right">Tax</th>
+                                        <?php if (!$config_hide_tax_fields) { ?><th class="text-right">Tax</th><?php } ?>
                                         <th class="text-right">Amount</th>
                                     </tr>
                                 </thead>
@@ -361,7 +387,7 @@ if (isset($_GET['quote_id'])) {
                                             <td><?php echo nl2br($item_description); ?></td>
                                             <td class="text-center"><?php echo number_format($item_quantity, 2); ?></td>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
-                                            <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td>
+                                            <?php if (!$config_hide_tax_fields) { ?><td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td><?php } ?>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_total, $quote_currency_code); ?></td>
                                         </tr>
 
@@ -396,8 +422,8 @@ if (isset($_GET['quote_id'])) {
                                             <td>
                                                 <input type="text" class="form-control" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" id="price" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
                                             </td>
-                                            <td>
-                                                <select class="form-control select2" id="tax" name="tax_id" required>
+                                            <?php if (!$config_hide_tax_fields) { ?><td>
+                                                <select class="form-control select2" id="tax" name="tax_id" required><?php } else { ?><input type="hidden" name="tax_id" value="0"><?php } ?>
                                                     <option value="0">No Tax</option>
                                                     <?php
 
@@ -461,7 +487,7 @@ if (isset($_GET['quote_id'])) {
                                     <td class="text-right">-<?php echo numfmt_format_currency($currency_format, $quote_discount, $quote_currency_code); ?></td>
                                 </tr>
                             <?php } ?>
-                            <?php if ($total_tax > 0) { ?>
+                            <?php if ($total_tax > 0 && !$config_hide_tax_fields) { ?>
                                 <tr>
                                     <td>Tax:</td>
                                     <td class="text-right"><?php echo numfmt_format_currency($currency_format, $total_tax, $quote_currency_code); ?></td>
@@ -597,16 +623,28 @@ require_once "../includes/footer.php";
         var availableProducts = <?php echo $json_products ?? '""' ?>;
 
         $("#name").autocomplete({
-            source: availableProducts,
+            source: function(request, response) {
+                var term = request.term.toLowerCase();
+                var filtered = availableProducts.filter(function(item) {
+                    return item.label.toLowerCase().indexOf(term) > -1 ||
+                           (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
+                           (item.description && item.description.toLowerCase().indexOf(term) > -1);
+                });
+                response(filtered);
+            },
             select: function(event, ui) {
-                $("#name").val(ui.item.label); // Product name field - this seemingly has to referenced as label
-                $("#desc").val(ui.item.description); // Product description field
-                $("#qty").val(1); // Product quantity field automatically make it a 1
-                $("#price").val(ui.item.price); // Product price field
+                $("#name").val(ui.item.label); // Item name field
+                $("#desc").val(ui.item.description); // Item description field
+                $("#qty").val(1); // Quantity field automatically make it a 1
+                $("#price").val(ui.item.price); // Price field
                 $("#tax").val(ui.item.tax); // Tax field
                 return false;
             }
-        });
+        }).autocomplete("instance")._renderItem = function(ul, item) {
+            return $("<li>")
+                .append("<div><strong>" + item.display_label + "</strong><br><small>" + (item.description || '') + "</small></div>")
+                .appendTo(ul);
+        };
     });
 </script>
 
@@ -630,4 +668,4 @@ new Sortable(document.querySelector('table#items tbody'), {
     }
 });
 </script>
-<link rel="stylesheet" href="css/quote_dropdowns_fix.css">
+<link rel="stylesheet" href="css/quote_dropdowns_fix.css?v=<?php echo time(); ?>">

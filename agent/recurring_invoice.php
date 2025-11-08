@@ -102,11 +102,37 @@ if (isset($_GET['recurring_invoice_id'])) {
 
     $sql_history = mysqli_query($mysqli, "SELECT * FROM history WHERE history_recurring_invoice_id = $recurring_invoice_id ORDER BY history_id DESC");
 
-    //Product autocomplete
-    $products_sql = mysqli_query($mysqli, "SELECT product_name AS label, product_description AS description, product_price AS price, product_tax_id AS tax FROM products WHERE product_archived_at IS NULL");
+    //Product & Service autocomplete - combine products and service catalog
+    $items_sql = mysqli_query($mysqli, "
+        SELECT
+            product_name AS label,
+            CONCAT('[Product] ', product_name) AS display_label,
+            product_description AS description,
+            product_price AS price,
+            product_tax_id AS tax,
+            'Product' AS type,
+            '' AS category
+        FROM products
+        WHERE product_archived_at IS NULL
 
-    if (mysqli_num_rows($products_sql) > 0) {
-        while ($row = mysqli_fetch_array($products_sql)) {
+        UNION ALL
+
+        SELECT
+            service_name AS label,
+            CONCAT('[', service_category, '] ', service_name) AS display_label,
+            service_description AS description,
+            service_default_rate AS price,
+            0 AS tax,
+            'Service' AS type,
+            service_category AS category
+        FROM service_catalog
+        WHERE service_status = 'Active'
+
+        ORDER BY label ASC
+    ");
+
+    if (mysqli_num_rows($items_sql) > 0) {
+        while ($row = mysqli_fetch_array($items_sql)) {
             $products[] = $row;
         }
         $json_products = json_encode($products);
@@ -487,16 +513,28 @@ require_once "../includes/footer.php";
         var availableProducts = <?php echo $json_products?>;
 
         $("#name").autocomplete({
-            source: availableProducts,
+            source: function(request, response) {
+                var term = request.term.toLowerCase();
+                var filtered = availableProducts.filter(function(item) {
+                    return item.label.toLowerCase().indexOf(term) > -1 ||
+                           (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
+                           (item.description && item.description.toLowerCase().indexOf(term) > -1);
+                });
+                response(filtered);
+            },
             select: function (event, ui) {
-                $("#name").val(ui.item.label); // Product name field - this seemingly has to referenced as label
-                $("#desc").val(ui.item.description); // Product description field
-                $("#qty").val(1); // Product quantity field automatically make it a 1
-                $("#price").val(ui.item.price); // Product price field
-                $("#tax").val(ui.item.tax); // Product tax field
+                $("#name").val(ui.item.label); // Item name field
+                $("#desc").val(ui.item.description); // Item description field
+                $("#qty").val(1); // Quantity field automatically make it a 1
+                $("#price").val(ui.item.price); // Price field
+                $("#tax").val(ui.item.tax); // Tax field
                 return false;
             }
-        });
+        }).autocomplete("instance")._renderItem = function(ul, item) {
+            return $("<li>")
+                .append("<div><strong>" + item.display_label + "</strong><br><small>" + (item.description || '') + "</small></div>")
+                .appendTo(ul);
+        };
     });
 </script>
 

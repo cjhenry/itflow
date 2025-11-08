@@ -88,13 +88,13 @@ ITFlow currently operates with:
 - Configure block hour packages with a defined number of hours
 - View all agreements with their status (Active, Expired, Pending Renewal)
 - Receive notifications 60 days before agreement expiration
-- Clone an expiring agreement to create a renewal
+- Clone an expiring agreement to create a renewal - nice to have but i can just extend the end date as well
 
 **As a Technician, I want to:**
 - See which agreements a client has when viewing/creating tickets
 - Know if my ticket work is covered under an agreement or billable
 - See remaining hours on block-hour agreements before starting work
-- Select an agreement when creating a ticket (required field)
+- Select an agreement when creating a ticket (required field). One agreement is set as default.
 - View agreement coverage details (what assets/services are included)
 
 **As a Billing Administrator, I want to:**

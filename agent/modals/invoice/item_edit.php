@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../../includes/modal_header.php';
+require_once '../../includes/inc_invoice_services.php';
 
 $item_id = intval($_GET['id']);
 
@@ -13,6 +14,15 @@ $item_price = floatval($row['item_price']);
 $item_created_at = nullable_htmlentities($row['item_created_at']);
 $tax_id = intval($row['item_tax_id']);
 $product_id = intval($row['item_product_id']);
+$service_id = intval($row['item_service_id'] ?? 0);
+
+// Get invoice to determine client
+$invoice_sql = mysqli_query($mysqli, "SELECT invoice_client_id FROM invoices WHERE invoice_id IN (SELECT item_invoice_id FROM invoice_items WHERE item_id = $item_id)");
+$invoice_row = mysqli_fetch_array($invoice_sql);
+$client_id = intval($invoice_row['invoice_client_id'] ?? 0);
+
+// Get available services for client
+$available_services = $client_id > 0 ? getServicesForInvoice($mysqli, $client_id) : [];
 
 // Generate the HTML form content using output buffering.
 ob_start();
@@ -29,6 +39,24 @@ ob_start();
     <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
     
     <div class="modal-body">
+        <div class="form-group">
+            <label>Service (Optional)</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-fw fa-cogs"></i></span>
+                </div>
+                <select class="form-control select2" id="service_select" name="service_id">
+                    <option value="0">-- No Service --</option>
+                    <?php foreach ($available_services as $svc) { ?>
+                        <option value="<?php echo $svc['service_id']; ?>" <?php echo $service_id == $svc['service_id'] ? 'selected' : ''; ?>>
+                            <?php echo $svc['service_name']; ?> - $<?php echo number_format($svc['effective_rate'], 2); ?>/<?php echo $svc['service_category']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+            <small class="text-muted">Selecting a service will auto-populate price from your service rates.</small>
+        </div>
+
         <div class="form-group">
             <label>Item <strong class="text-danger">*</strong></label>
             <div class="input-group">
@@ -101,6 +129,36 @@ ob_start();
         <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fas fa-times mr-2"></i>Cancel</button>
     </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceSelect = document.getElementById('service_select');
+    if (serviceSelect) {
+        // Parse service data from options
+        const services = {};
+        Array.from(serviceSelect.options).forEach(option => {
+            if (option.value !== '0') {
+                const text = option.text;
+                const parts = text.split(' - $');
+                if (parts.length === 2) {
+                    const rate = parseFloat(parts[1].split('/')[0]);
+                    services[option.value] = rate;
+                }
+            }
+        });
+
+        serviceSelect.addEventListener('change', function() {
+            const serviceId = this.value;
+            if (serviceId !== '0' && services[serviceId]) {
+                const price = document.querySelector('input[name="price"]');
+                if (price) {
+                    price.value = services[serviceId].toFixed(2);
+                }
+            }
+        });
+    }
+});
+</script>
 
 <?php
 require_once '../../../includes/modal_footer.php';

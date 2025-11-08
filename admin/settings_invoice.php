@@ -46,6 +46,15 @@ require_once "includes/inc_all_admin.php";
                     </div>
                 </div>
 
+                <h5>Hide Tax Fields</h5>
+
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" name="config_hide_tax_fields" <?php if ($config_hide_tax_fields == 1) { echo "checked"; } ?> value="1" id="customSwitch_HideTax">
+                        <label class="custom-control-label" for="customSwitch_HideTax">Remove tax columns from all quotes & invoices</label>
+                    </div>
+                </div>
+
                 <h5>Invoice Late Fees</h5>
 
                 <div class="form-group">

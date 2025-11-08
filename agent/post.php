@@ -14,14 +14,23 @@ define('FROM_POST_HANDLER', true);
 
 // Determine which files we should load
 
-// Parse URL & get the path
-$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+// Determine module to load - check for explicit module field first, fall back to HTTP_REFERER
+$module = isset($_POST['module']) ? sanitizeInput($_POST['module']) : null;
 
-// Get the base name (the page name)
-$module = explode(".", basename($path))[0];
+if (!$module && isset($_GET['module'])) {
+    $module = sanitizeInput($_GET['module']);
+}
 
-// Strip off any _details bits
-$module = str_ireplace('_details', '', $module);
+if (!$module && isset($_SERVER['HTTP_REFERER'])) {
+    // Parse URL & get the path
+    $path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+
+    // Get the base name (the page name)
+    $module = explode(".", basename($path))[0];
+
+    // Strip off any _details bits
+    $module = str_ireplace('_details', '', $module);
+}
 
 // Dynamically load admin-related module POST logic
 
@@ -31,7 +40,15 @@ $module = str_ireplace('_details', '', $module);
 
 foreach (glob("post/*.php") as $user_module) {
     if (!preg_match('/_model\.php$/', basename($user_module))) {
-        require_once $user_module;
+        $handler_module = str_replace('.php', '', basename($user_module));
+        // Only load handler if it matches the determined module
+        // Also handle singular/plural variations (quotes->quote, invoices->invoice, etc)
+        $module_singular = rtrim($module, 's');
+        $module_match = !$module || $handler_module === $module || $handler_module === $module_singular;
+
+        if ($module_match) {
+            require_once $user_module;
+        }
     }
 }
 

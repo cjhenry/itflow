@@ -20,6 +20,9 @@ $client_rate = floatval($row['client_rate']);
 $client_notes = nullable_htmlentities($row['client_notes']);
 $client_created_at = nullable_htmlentities($row['client_created_at']);
 $client_archived_at = nullable_htmlentities($row['client_archived_at']);
+$client_billing_contact_name = nullable_htmlentities($row['client_billing_contact_name']);
+$client_billing_contact_email = nullable_htmlentities($row['client_billing_contact_email']);
+$client_billing_cc_emails = nullable_htmlentities($row['client_billing_cc_emails']);
 
 // Client Tags
 $client_tag_id_array = array();
@@ -235,6 +238,42 @@ ob_start();
                             <input type="text" class="form-control" name="tax_id_number" maxlength="255"
                                    placeholder="Tax ID Number" value="<?php echo $client_tax_id_number; ?>">
                         </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
+                        <label>Billing Contact Name</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-fw fa-user"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="billing_contact_name" maxlength="100"
+                                   placeholder="Name of billing contact" value="<?php echo $client_billing_contact_name; ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Billing Contact Email</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-fw fa-envelope"></i></span>
+                            </div>
+                            <input type="email" class="form-control" name="billing_contact_email" maxlength="100"
+                                   placeholder="billing@example.com" value="<?php echo $client_billing_contact_email; ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Billing CC Emails</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-fw fa-copy"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="billing_cc_emails" maxlength="500"
+                                   placeholder="email1@example.com, email2@example.com" value="<?php echo $client_billing_cc_emails; ?>">
+                        </div>
+                        <small class="text-muted">Comma-separated list of email addresses to CC on invoices</small>
                     </div>
 
                 </div>

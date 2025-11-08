@@ -113,6 +113,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="agreements.php" class="nav-link <?php if (basename($_SERVER["PHP_SELF"]) == "agreements.php" || basename($_SERVER["PHP_SELF"]) == "agreement_details.php") { echo "active"; } ?>">
+                            <i class="nav-icon fas fa-handshake"></i>
+                            <p>Agreements</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="revenues.php" class="nav-link <?php if (basename($_SERVER["PHP_SELF"]) == "revenues.php") { echo "active"; } ?>">
                             <i class="nav-icon fas fa-hand-holding-usd"></i>
                             <p>Revenues</p>

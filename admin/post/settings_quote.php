@@ -13,8 +13,9 @@ if (isset($_POST['edit_quote_settings'])) {
     if (filter_var($_POST['config_quote_notification_email'], FILTER_VALIDATE_EMAIL)) {
         $config_quote_notification_email = sanitizeInput($_POST['config_quote_notification_email']);
     }
+    $config_hide_tax_fields = intval($_POST['config_hide_tax_fields'] ?? 0);
 
-    mysqli_query($mysqli,"UPDATE settings SET config_quote_prefix = '$config_quote_prefix', config_quote_next_number = $config_quote_next_number, config_quote_footer = '$config_quote_footer', config_quote_notification_email = '$config_quote_notification_email' WHERE company_id = 1");
+    mysqli_query($mysqli,"UPDATE settings SET config_quote_prefix = '$config_quote_prefix', config_quote_next_number = $config_quote_next_number, config_quote_footer = '$config_quote_footer', config_hide_tax_fields = $config_hide_tax_fields, config_quote_notification_email = '$config_quote_notification_email' WHERE company_id = 1");
 
     logAction("Settings", "Edit", "$session_name edited Quote settings");
 

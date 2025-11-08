@@ -35,6 +35,15 @@ require_once "includes/inc_all_admin.php";
                     <textarea class="form-control" rows="4" name="config_quote_footer"><?php echo nullable_htmlentities($config_quote_footer); ?></textarea>
                 </div>
 
+                <h5>Hide Tax Fields</h5>
+
+                <div class="form-group">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" name="config_hide_tax_fields" <?php if ($config_hide_tax_fields == 1) { echo "checked"; } ?> value="1" id="customSwitch_HideTax">
+                        <label class="custom-control-label" for="customSwitch_HideTax">Remove tax columns from all quotes & invoices</label>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Email address to notify when quotes are accepted/declined <small class="text-secondary">(Ideally a distribution list/shared mailbox)</small></label>
                     <div class="input-group">

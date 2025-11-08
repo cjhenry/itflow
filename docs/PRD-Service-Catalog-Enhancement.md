@@ -663,7 +663,6 @@ GET    /api/invoices/{id}/services        - List services available for invoice
 | **Rate Hierarchy** | Precedence: Agreement Rate > Client Rate > Master Rate |
 | **Primary Support Contact** | Main contact for technical support (replaces "Primary Contact") |
 | **Billing Contact** | Designated person for invoicing communications |
-
 ---
 
 ## Document History
@@ -676,3 +675,5 @@ GET    /api/invoices/{id}/services        - List services available for invoice
 ---
 
 **Next Step:** Stakeholder review and sign-off. Upon approval, proceed to Phase 1 database implementation.
+
+**Status:** ✓ Available on GitHub at https://github.com/cjhenry/itflow/blob/master/docs/PRD-Service-Catalog-Enhancement.md

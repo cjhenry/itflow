@@ -36,7 +36,7 @@ if (isset($_POST['add_client'])) {
     $extended_log_description = '';
 
     // Create client
-    mysqli_query($mysqli, "INSERT INTO clients SET client_name = '$name', client_type = '$type', client_website = '$website', client_referral = '$referral', client_rate = $rate, client_currency_code = '$currency_code', client_net_terms = $net_terms, client_tax_id_number = '$tax_id_number', client_lead = $lead, client_abbreviation = '$abbreviation', client_notes = '$notes', client_accessed_at = NOW()");
+    mysqli_query($mysqli, "INSERT INTO clients SET client_name = '$name', client_type = '$type', client_website = '$website', client_referral = '$referral', client_rate = $rate, client_currency_code = '$currency_code', client_net_terms = $net_terms, client_tax_id_number = '$tax_id_number', client_billing_contact_name = '$billing_contact_name', client_billing_contact_email = '$billing_contact_email', client_billing_cc_emails = '$billing_cc_emails', client_lead = $lead, client_abbreviation = '$abbreviation', client_notes = '$notes', client_accessed_at = NOW()");
 
     $client_id = mysqli_insert_id($mysqli);
 
@@ -121,7 +121,7 @@ if (isset($_POST['add_client'])) {
 
     flash_alert("Client <strong>$name</strong> created");
 
-    redirect();
+    header('Location: clients.php');
 
 }
 
@@ -133,7 +133,7 @@ if (isset($_POST['edit_client'])) {
 
     $client_id = intval($_POST['client_id']);
 
-    mysqli_query($mysqli, "UPDATE clients SET client_name = '$name', client_type = '$type', client_website = '$website', client_referral = '$referral', client_rate = $rate, client_currency_code = '$currency_code', client_net_terms = $net_terms, client_tax_id_number = '$tax_id_number', client_lead = $lead, client_abbreviation = '$abbreviation', client_notes = '$notes' WHERE client_id = $client_id");
+    mysqli_query($mysqli, "UPDATE clients SET client_name = '$name', client_type = '$type', client_website = '$website', client_referral = '$referral', client_rate = $rate, client_currency_code = '$currency_code', client_net_terms = $net_terms, client_tax_id_number = '$tax_id_number', client_billing_contact_name = '$billing_contact_name', client_billing_contact_email = '$billing_contact_email', client_billing_cc_emails = '$billing_cc_emails', client_lead = $lead, client_abbreviation = '$abbreviation', client_notes = '$notes' WHERE client_id = $client_id");
 
     // Create Referral if it doesn't exist
     $sql = mysqli_query($mysqli, "SELECT category_name FROM categories WHERE category_type = 'Referral' AND category_archived_at IS NULL AND category_name = '$referral'");
@@ -159,7 +159,7 @@ if (isset($_POST['edit_client'])) {
 
     flash_alert("Client <strong>$name</strong> updated");
 
-    redirect();
+    header('Location: clients.php');
 
 }
 
@@ -180,7 +180,7 @@ if (isset($_GET['archive_client'])) {
 
     flash_alert("Client <strong>$client_name</strong> archived", 'error');
 
-    redirect();
+    header('Location: clients.php');
 
 }
 
@@ -201,7 +201,7 @@ if (isset($_GET['restore_client'])) {
 
     flash_alert("Client <strong>$client_name</strong> restored");
 
-    redirect();
+    header('Location: clients.php');
 
 }
 

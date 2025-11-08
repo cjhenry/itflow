@@ -12,6 +12,9 @@ if (isset($_GET['client_id'])) {
 // Perms
 enforceUserPermission('module_support');
 
+// Load service catalog helpers
+require_once "includes/inc_invoice_services.php";
+
 // Initialize the HTML Purifier to prevent XSS
 require_once "../plugins/htmlpurifier/HTMLPurifier.standalone.php";
 
@@ -668,6 +671,19 @@ if (isset($_GET['ticket_id'])) {
                                                 <button type="button" class="btn btn-light" id="resetTimer"><i class="fas fa-redo-alt"></i></button>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <!-- Service Selection -->
+                                    <div class="col-md-6">
+                                        <select class="form-control" name="service_id" id="ticket_service_select">
+                                            <option value="0">-- Service (Optional) --</option>
+                                            <?php
+                                                $ticket_services = getServicesForInvoice($mysqli, $client_id);
+                                                foreach ($ticket_services as $svc) {
+                                                    echo '<option value="' . $svc['service_id'] . '">' . htmlspecialchars($svc['service_name']) . ' ($' . number_format($svc['effective_rate'], 2) . ')</option>';
+                                                }
+                                            ?>
+                                        </select>
                                     </div>
 
                                     <div class="col-md-3">

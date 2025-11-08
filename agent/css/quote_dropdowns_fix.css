@@ -13,3 +13,24 @@
     min-width: max-content;
     z-index: 1050;
 }
+
+/* Improved contrast for item entry row */
+table#items tbody tr:has(form) {
+    background-color: #f8f9fa;
+}
+
+table#items tbody tr:has(form) td {
+    padding: 12px !important;
+    border-top: 2px solid #dee2e6 !important;
+}
+
+table#items tbody tr form .form-control,
+table#items tbody tr form .select2-container .select2-selection {
+    border: 2px solid #ced4da !important;
+    background-color: #ffffff !important;
+}
+
+table#items tbody tr form .form-control:focus {
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}

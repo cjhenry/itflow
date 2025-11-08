@@ -21,7 +21,7 @@ if (isset($_POST['add_product'])) {
 
     flash_alert("Product <strong>$name</strong> created");
 
-    redirect();
+    header('Location: products.php');
 
 }
 
@@ -39,7 +39,7 @@ if (isset($_POST['edit_product'])) {
 
     flash_alert("Product <strong>$name</strong> edited");
 
-    redirect();
+    header('Location: products.php');
 
 }
 
@@ -57,7 +57,7 @@ if (isset($_GET['archive_product'])) {
 
     flash_alert("Product <strong>$product_name</strong> archived", 'error');
 
-    redirect();
+    header('Location: products.php');
 
 }
 
@@ -75,7 +75,7 @@ if (isset($_GET['unarchive_product'])) {
 
     flash_alert("Product <strong>$product_name</strong> restored");
 
-    redirect();
+    header('Location: products.php');
 
 }
 

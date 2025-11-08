@@ -1,0 +1,37 @@
+services:
+  web:
+    image: php:8.1-apache
+    container_name: itflow-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y libicu-dev zlib1g-dev libpng-dev libjpeg-dev &&
+      docker-php-ext-install mysqli pdo pdo_mysql intl gd &&
+      a2enmod rewrite &&
+      chown -R www-data:www-data /var/www/html &&
+      apache2-foreground
+      "
+
+  db:
+    image: mariadb:10.11
+    container_name: itflow-db
+    environment:
+      MYSQL_ROOT_PASSWORD: itflow_root_pass
+      MYSQL_DATABASE: itflow
+      MYSQL_USER: itflow
+      MYSQL_PASSWORD: itflow
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
