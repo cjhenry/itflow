@@ -198,7 +198,11 @@ if (isset($_POST['add_quote_item'])) {
 
     $total = $subtotal_after_discount + $tax_amount;
 
-    mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_order = $item_order, item_quote_id = $quote_id");
+    $insert_result = mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_order = $item_order, item_quote_id = $quote_id");
+
+    if (!$insert_result) {
+        die("Database Error: " . mysqli_error($mysqli));
+    }
 
     // Get Quote Details
     $sql = mysqli_query($mysqli,"SELECT * FROM quotes WHERE quote_id = $quote_id");
