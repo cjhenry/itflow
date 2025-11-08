@@ -657,8 +657,8 @@ if (isset($_POST['edit_item'])) {
 
     error_log("DEBUG: Calculated - subtotal: $subtotal, discount_amount: $discount_amount, subtotal_after_discount: $subtotal_after_discount, tax_amount: $tax_amount, total: $total");
 
-    $service_id_sql = $service_id > 0 ? $service_id : "NULL";
-    $update_query = "UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_service_id = $service_id_sql WHERE item_id = $item_id";
+    // Note: item_service_id column doesn't exist, only update columns that exist in the schema
+    $update_query = "UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id WHERE item_id = $item_id";
     error_log("DEBUG: UPDATE query: " . $update_query);
 
     $update_result = mysqli_query($mysqli, $update_query);
