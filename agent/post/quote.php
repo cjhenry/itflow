@@ -175,23 +175,25 @@ if (isset($_POST['add_quote_item'])) {
     $description = sanitizeInput($_POST['description']);
     $qty = floatval($_POST['qty']);
     $price = floatval($_POST['price']);
+    $discount = floatval($_POST['discount'] ?? 0);
     $tax_id = intval($_POST['tax_id']);
     $item_order = intval($_POST['item_order']);
 
     $subtotal = $price * $qty;
+    $subtotal_after_discount = $subtotal - $discount;
 
     if ($tax_id > 0) {
         $sql = mysqli_query($mysqli,"SELECT * FROM taxes WHERE tax_id = $tax_id");
         $row = mysqli_fetch_array($sql);
         $tax_percent = floatval($row['tax_percent']);
-        $tax_amount = $subtotal * $tax_percent / 100;
+        $tax_amount = $subtotal_after_discount * $tax_percent / 100;
     }else{
         $tax_amount = 0;
     }
 
-    $total = $subtotal + $tax_amount;
+    $total = $subtotal_after_discount + $tax_amount;
 
-    mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_order = $item_order, item_quote_id = $quote_id");
+    mysqli_query($mysqli,"INSERT INTO invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_order = $item_order, item_quote_id = $quote_id");
 
     // Get Quote Details
     $sql = mysqli_query($mysqli,"SELECT * FROM quotes WHERE quote_id = $quote_id");
