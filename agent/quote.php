@@ -145,6 +145,29 @@ if (isset($_GET['quote_id'])) {
         $json_products = json_encode($products);
     }
 
+    // Products only for new item entry form
+    $products_only_sql = mysqli_query($mysqli, "
+        SELECT
+            product_name AS label,
+            CONCAT('[Product] ', product_name) AS display_label,
+            product_description AS description,
+            product_price AS price,
+            product_tax_id AS tax,
+            'Product' AS type,
+            '' AS category
+        FROM products
+        WHERE product_archived_at IS NULL
+        ORDER BY product_name ASC
+    ");
+
+    if (mysqli_num_rows($products_only_sql) > 0) {
+        $products_list = [];
+        while ($row = mysqli_fetch_array($products_only_sql)) {
+            $products_list[] = $row;
+        }
+        $json_products_only = json_encode($products_list);
+    }
+
     // Quote File Attachments
     $sql_quote_files = mysqli_query(
         $mysqli,
@@ -398,6 +421,13 @@ if (isset($_GET['quote_id'])) {
                                     ?>
 
                                     <tbody id="quote-item-rows">
+                                        <tr class="d-print-none" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
+                                                                        echo "hidden";
+                                                                    } ?>>
+                                            <td colspan="6" style="background-color: #f8f9fa; padding: 12px; font-weight: 600; border-bottom: 2px solid #495057;">
+                                                <i class="fas fa-box mr-2"></i>Add Product
+                                            </td>
+                                        </tr>
                                         <tr class="d-print-none quote-item-row" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
                                                                         echo "hidden";
                                                                     } ?>>
@@ -627,24 +657,24 @@ require_once "../includes/footer.php";
 <script src="../plugins/jquery-ui/jquery-ui.min.js"></script>
 <script>
     $(function() {
-        var availableProducts = <?php echo $json_products ?? '""' ?>;
+        var availableProductsOnly = <?php echo $json_products_only ?? '""' ?>;
 
-        $("#name").autocomplete({
+        // Setup autocomplete for product entry form
+        $(".item-name").autocomplete({
             source: function(request, response) {
                 var term = request.term.toLowerCase();
-                var filtered = availableProducts.filter(function(item) {
+                var filtered = availableProductsOnly.filter(function(item) {
                     return item.label.toLowerCase().indexOf(term) > -1 ||
-                           (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
                            (item.description && item.description.toLowerCase().indexOf(term) > -1);
                 });
                 response(filtered);
             },
             select: function(event, ui) {
-                $("#name").val(ui.item.label); // Item name field
-                $("#desc").val(ui.item.description); // Item description field
-                $("#qty").val(1); // Quantity field automatically make it a 1
-                $("#price").val(ui.item.price); // Price field
-                $("#tax").val(ui.item.tax); // Tax field
+                $(this).val(ui.item.label); // Item name field
+                $(this).closest('form').find('.item-description').val(ui.item.description); // Item description field
+                $(this).closest('form').find('.item-qty').val(1); // Quantity field
+                $(this).closest('form').find('.item-price').val(ui.item.price); // Price field
+                $(this).closest('form').find('.item-tax').val(ui.item.tax); // Tax field
                 return false;
             }
         }).autocomplete("instance")._renderItem = function(ul, item) {
@@ -724,15 +754,14 @@ $(document).ready(function() {
             $('.item-tax:last').select2();
         }
 
-        // Re-initialize autocomplete for the new name field
-        const availableProducts = <?php echo $json_products ?? '""' ?>;
-        if (availableProducts) {
+        // Re-initialize autocomplete for the new name field (products only)
+        const availableProductsOnly = <?php echo $json_products_only ?? '""' ?>;
+        if (availableProductsOnly) {
             $('.item-name:last').autocomplete({
                 source: function(request, response) {
                     var term = request.term.toLowerCase();
-                    var filtered = availableProducts.filter(function(item) {
+                    var filtered = availableProductsOnly.filter(function(item) {
                         return item.label.toLowerCase().indexOf(term) > -1 ||
-                               (item.category && item.category.toLowerCase().indexOf(term) > -1) ||
                                (item.description && item.description.toLowerCase().indexOf(term) > -1);
                     });
                     response(filtered);
