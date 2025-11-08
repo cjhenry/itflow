@@ -1188,6 +1188,7 @@ CREATE TABLE `invoice_items` (
   `item_quantity` decimal(15,2) NOT NULL DEFAULT 0.00,
   `item_price` decimal(15,2) NOT NULL DEFAULT 0.00,
   `item_subtotal` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `item_discount` decimal(5,2) NOT NULL DEFAULT 0.00,
   `item_tax` decimal(15,2) NOT NULL DEFAULT 0.00,
   `item_total` decimal(15,2) NOT NULL DEFAULT 0.00,
   `item_order` int(11) NOT NULL DEFAULT 0,
