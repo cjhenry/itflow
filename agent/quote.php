@@ -338,20 +338,22 @@ if (isset($_GET['quote_id'])) {
                     <h5 class="badge badge-<?php echo $quote_badge_color; ?> p-2 float-right">
                         <?php echo "$quote_status"; ?>
                     </h5>
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>Quote #:</th>
-                            <td class="text-right"><?php echo "$quote_prefix$quote_number"; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Date:</th>
-                            <td class="text-right"><?php echo $quote_date; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Expires:</th>
-                            <td class="text-right"><?php echo $quote_expire; ?></td>
-                        </tr>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <th>Quote #:</th>
+                                <td class="text-right"><?php echo "$quote_prefix$quote_number"; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Date:</th>
+                                <td class="text-right"><?php echo $quote_date; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Expires:</th>
+                                <td class="text-right"><?php echo $quote_expire; ?></td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
 
             </div>
