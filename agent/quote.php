@@ -440,14 +440,15 @@ if (isset($_GET['quote_id'])) {
                                                     <select class="form-control select2 item-name" name="name" required>
                                                         <option value="">Select a Product...</option>
                                                         <?php
-                                                        if (mysqli_num_rows($products_only_sql) > 0) {
-                                                            $products_only_sql = mysqli_query($mysqli, "
-                                                                SELECT product_id, product_name, product_description, product_price, product_tax_id
-                                                                FROM products
-                                                                WHERE product_archived_at IS NULL
-                                                                ORDER BY product_name ASC
-                                                            ");
-                                                            while ($row = mysqli_fetch_array($products_only_sql)) {
+                                                        $products_dropdown_sql = mysqli_query($mysqli, "
+                                                            SELECT product_id, product_name, product_description, product_price, product_tax_id
+                                                            FROM products
+                                                            WHERE product_type = 'product'
+                                                            AND product_archived_at IS NULL
+                                                            ORDER BY product_name ASC
+                                                        ");
+                                                        if (mysqli_num_rows($products_dropdown_sql) > 0) {
+                                                            while ($row = mysqli_fetch_array($products_dropdown_sql)) {
                                                                 $product_id = intval($row['product_id']);
                                                                 $product_name = nullable_htmlentities($row['product_name']);
                                                                 $product_description = nullable_htmlentities($row['product_description']);
