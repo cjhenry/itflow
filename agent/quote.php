@@ -680,11 +680,11 @@ require_once "../includes/footer.php";
 <script>
     $(function() {
         // Function to calculate amount (qty × price)
-        function calculateAmount(form) {
-            var qty = parseFloat(form.find('.item-qty').val()) || 0;
-            var price = parseFloat(form.find('.item-price').val()) || 0;
+        function calculateAmount(row) {
+            var qty = parseFloat(row.find('.item-qty').val()) || 0;
+            var price = parseFloat(row.find('.item-price').val()) || 0;
             var amount = (qty * price).toFixed(2);
-            form.find('.item-amount').val(amount);
+            row.find('.item-amount').val(amount);
         }
 
         // Handle product selection change
@@ -694,26 +694,28 @@ require_once "../includes/footer.php";
             var price = selectedOption.data('price');
             var tax = selectedOption.data('tax');
 
-            var form = $(this).closest('form');
-            form.find('.item-description').val(description);
-            form.find('.item-qty').val(1);
-            form.find('.item-price').val(price);
-            form.find('.item-tax').val(tax).change();
+            var row = $(this).closest('tr');
+            row.find('.item-description').val(description);
+            row.find('.item-qty').val(1);
+            row.find('.item-price').val(price);
+            if (row.find('.item-tax').length > 0) {
+                row.find('.item-tax').val(tax).change();
+            }
 
             // Calculate amount after setting values
-            calculateAmount(form);
+            calculateAmount(row);
         });
 
-        // Handle qty change
-        $(document).on('change', '.item-qty', function() {
-            var form = $(this).closest('form');
-            calculateAmount(form);
+        // Handle qty change and input
+        $(document).on('change input', '.item-qty', function() {
+            var row = $(this).closest('tr');
+            calculateAmount(row);
         });
 
-        // Handle price change
-        $(document).on('change', '.item-price', function() {
-            var form = $(this).closest('form');
-            calculateAmount(form);
+        // Handle price change and input
+        $(document).on('change input', '.item-price', function() {
+            var row = $(this).closest('tr');
+            calculateAmount(row);
         });
 
         // Initialize Select2 for product dropdowns
