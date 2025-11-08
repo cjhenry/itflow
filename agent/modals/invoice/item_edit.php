@@ -40,24 +40,6 @@ ob_start();
     
     <div class="modal-body">
         <div class="form-group">
-            <label>Service (Optional)</label>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-fw fa-cogs"></i></span>
-                </div>
-                <select class="form-control select2" id="service_select" name="service_id">
-                    <option value="0">-- No Service --</option>
-                    <?php foreach ($available_services as $svc) { ?>
-                        <option value="<?php echo $svc['service_id']; ?>" <?php echo $service_id == $svc['service_id'] ? 'selected' : ''; ?>>
-                            <?php echo $svc['service_name']; ?> - $<?php echo number_format($svc['effective_rate'], 2); ?>/<?php echo $svc['service_category']; ?>
-                        </option>
-                    <?php } ?>
-                </select>
-            </div>
-            <small class="text-muted">Selecting a service will auto-populate price from your service rates.</small>
-        </div>
-
-        <div class="form-group">
             <label>Item <strong class="text-danger">*</strong></label>
             <div class="input-group">
                 <div class="input-group-prepend">
