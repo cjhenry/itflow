@@ -100,6 +100,7 @@ ob_start();
             </div>
         </div>
 
+        <?php if (!$config_hide_tax_fields) { ?>
         <div class="form-group">
             <label>Tax <strong class="text-danger">*</strong></label>
             <div class="input-group">
@@ -108,8 +109,8 @@ ob_start();
                 </div>
                 <select class="form-control select2" name="tax_id" required>
                     <option value="0">No Tax</option>
-                    <?php 
-                        $taxes_sql = mysqli_query($mysqli, "SELECT * FROM taxes WHERE (tax_archived_at > '$item_created_at' OR tax_archived_at IS NULL) ORDER BY tax_name ASC"); 
+                    <?php
+                        $taxes_sql = mysqli_query($mysqli, "SELECT * FROM taxes WHERE (tax_archived_at > '$item_created_at' OR tax_archived_at IS NULL) ORDER BY tax_name ASC");
                         while ($row = mysqli_fetch_array($taxes_sql)) {
                             $tax_id_select = intval($row['tax_id']);
                             $tax_name = nullable_htmlentities($row['tax_name']);
@@ -122,6 +123,9 @@ ob_start();
                 </select>
             </div>
         </div>
+        <?php } else { ?>
+        <input type="hidden" name="tax_id" value="0">
+        <?php } ?>
     </div>
 
     <div class="modal-footer">
