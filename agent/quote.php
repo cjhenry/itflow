@@ -328,7 +328,6 @@ if (isset($_GET['quote_id'])) {
                             <table class="table table-hover mb-0" id="items">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="d-print-none"></th>
                                         <th>Item</th>
                                         <th>Description</th>
                                         <th class="text-center">Qty</th>
@@ -358,14 +357,14 @@ if (isset($_GET['quote_id'])) {
                                         ?>
 
                                         <tr data-item-id="<?php echo $item_id; ?>">
-                                            <td class="d-print-none">
+                                            <td>
                                                 <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
-                                                    <div class="btn-group">
-                                                        <button type="button" class="btn btn-sm btn-link drag-handle">
+                                                    <div class="d-flex align-items-center">
+                                                        <button type="button" class="btn btn-sm btn-link drag-handle mr-2">
                                                             <i class="fas fa-bars text-muted"></i>
                                                         </button>
-
-                                                        <div class="dropdown">
+                                                        <span><?php echo $item_name; ?></span>
+                                                        <div class="dropdown ml-auto">
                                                             <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
                                                                 <i class="fas fa-ellipsis-v"></i>
                                                             </button>
@@ -381,9 +380,10 @@ if (isset($_GET['quote_id'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                <?php } else { ?>
+                                                    <?php echo $item_name; ?>
                                                 <?php } ?>
                                             </td>
-                                            <td><?php echo $item_name; ?></td>
                                             <td><?php echo nl2br($item_description); ?></td>
                                             <td class="text-center"><?php echo number_format($item_quantity, 2); ?></td>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
@@ -410,7 +410,6 @@ if (isset($_GET['quote_id'])) {
                                                 $item_order = intval($row['item_order']) + 1;
                                                 echo $item_order;
                                                 ?>">
-                                                <td></td>
                                                 <td>
                                                     <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
                                                 </td>
@@ -692,7 +691,6 @@ $(document).ready(function() {
                 <form class="quote-item-form" action="post.php" method="post" autocomplete="off">
                     <input type="hidden" name="quote_id" value="${quoteId}">
                     <input type="hidden" name="item_order" class="item-order" value="${lastOrder}">
-                    <td></td>
                     <td>
                         <input type="text" class="form-control item-name" name="name" placeholder="Item" required>
                     </td>
