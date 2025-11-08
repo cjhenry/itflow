@@ -347,6 +347,9 @@ if (isset($_GET['quote_id'])) {
             <div class="row mb-3">
                 <div class="col-md-12">
                     <div class="card">
+                        <div class="card-header text-bold" style="font-size: 1.1rem; padding: 12px 15px;">
+                            <i class="fas fa-box mr-2"></i>Products
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="items">
                                 <thead class="bg-light">
@@ -421,13 +424,6 @@ if (isset($_GET['quote_id'])) {
                                     ?>
 
                                     <tbody id="quote-item-rows">
-                                        <tr class="d-print-none" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
-                                                                        echo "hidden";
-                                                                    } ?>>
-                                            <td colspan="6" style="background-color: #f8f9fa; padding: 12px; font-weight: 600; border-bottom: 2px solid #495057;">
-                                                <i class="fas fa-box mr-2"></i>Add Product
-                                            </td>
-                                        </tr>
                                         <tr class="d-print-none quote-item-row" <?php if ($quote_status == "Invoiced" || $quote_status == "Accepted" || $quote_status == "Declined" || lookupUserPermission("module_sales") <= 1) {
                                                                         echo "hidden";
                                                                     } ?>>
@@ -484,7 +480,7 @@ if (isset($_GET['quote_id'])) {
                     <?php if ($quote_status !== "Invoiced" && $quote_status !== "Accepted" && $quote_status !== "Declined" && lookupUserPermission("module_sales") >= 2) { ?>
                     <div style="padding: 15px 0 0 0; text-align: center;">
                         <button type="button" class="btn btn-success btn-lg" id="add-item-row-btn">
-                            <i class="fas fa-plus mr-2"></i>Add Another Item
+                            <i class="fas fa-plus mr-2"></i>Add Another Product
                         </button>
                     </div>
                     <?php } ?>
