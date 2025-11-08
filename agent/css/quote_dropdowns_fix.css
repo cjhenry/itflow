@@ -17,11 +17,13 @@
 /* Improved contrast for item entry row */
 table#items tbody tr:has(form) {
     background-color: #f8f9fa;
+    border-bottom: 2px solid #495057 !important;
 }
 
 table#items tbody tr:has(form) td {
     padding: 12px !important;
-    border-top: 2px solid #dee2e6 !important;
+    border-bottom: 2px solid #495057 !important;
+    border-right: 2px solid #495057 !important;
 }
 
 table#items tbody tr form .form-control,
@@ -48,7 +50,7 @@ table#items tbody td:nth-child(2) {
 
 table#items thead th:nth-child(3),
 table#items tbody td:nth-child(3) {
-    width: 8%;
+    width: 5%;
 }
 
 table#items thead th:nth-child(4),
@@ -214,12 +216,9 @@ table.table-borderless tbody tr:last-child td {
     background-color: #ffffff;
 }
 
-/* Saved item row styling */
-table#items tbody tr.saved-item {
-    background-color: #f0f8f0;
-    opacity: 0.8;
-}
-
-table#items tbody tr.saved-item:hover {
-    background-color: #e8f5e8;
+/* Saved item checkmark styling */
+table#items tbody td.saved-checkmark {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #28a745 !important;
 }

@@ -362,6 +362,7 @@ if (isset($_GET['quote_id'])) {
                                         <th class="text-right">Unit Price</th>
                                         <?php if (!$config_hide_tax_fields) { ?><th class="text-right">Tax</th><?php } ?>
                                         <th class="text-right">Amount</th>
+                                        <th class="text-center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -413,10 +414,13 @@ if (isset($_GET['quote_id'])) {
                                                 <?php } ?>
                                             </td>
                                             <td><?php echo nl2br($item_description); ?></td>
-                                            <td class="text-center"><?php echo number_format($item_quantity, 2); ?></td>
+                                            <td class="text-center"><?php echo intval($item_quantity); ?></td>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_price, $quote_currency_code); ?></td>
                                             <?php if (!$config_hide_tax_fields) { ?><td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_tax, $quote_currency_code); ?></td><?php } ?>
                                             <td class="text-right"><?php echo numfmt_format_currency($currency_format, $item_total, $quote_currency_code); ?></td>
+                                            <td class="text-center saved-checkmark">
+                                                <i class="fa fa-check text-success"></i>
+                                            </td>
                                         </tr>
 
                                     <?php
@@ -470,7 +474,7 @@ if (isset($_GET['quote_id'])) {
                                                     <textarea class="form-control item-description" rows="2" name="description" placeholder="Enter a Description"></textarea>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control item-qty" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: center;" name="qty" placeholder="Qty">
+                                                    <input type="text" class="form-control item-qty" inputmode="numeric" pattern="[0-9]*" style="text-align: center;" name="qty" placeholder="Qty">
                                                 </td>
                                                 <td>
                                                     <input type="text" class="form-control item-price" inputmode="numeric" pattern="-?[0-9]*\.?[0-9]{0,2}" style="text-align: right;" name="price" placeholder="Price (<?php echo $quote_currency_code; ?>)">
