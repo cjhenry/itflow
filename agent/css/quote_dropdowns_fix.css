@@ -97,3 +97,86 @@ table#items th:last-child {
 table#items tbody tr:hover {
     background-color: #f0f0f0;
 }
+
+/* Enhanced borders for all form inputs on quote page */
+.form-control {
+    border: 2px solid #495057 !important;
+}
+
+.form-control:focus {
+    border-color: #0056b3 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25) !important;
+}
+
+textarea.form-control {
+    border: 2px solid #495057 !important;
+}
+
+/* Enhanced card borders */
+.card {
+    border: 2px solid #495057 !important;
+}
+
+.card-header {
+    border-bottom: 3px solid #495057 !important;
+}
+
+.card-body {
+    border: none !important;
+}
+
+/* Enhanced table borders in notes and history sections */
+.card table {
+    border: 1px solid #495057 !important;
+}
+
+.card table thead {
+    border-bottom: 2px solid #495057 !important;
+}
+
+.card table tbody tr {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.card table td,
+.card table th {
+    border-right: 1px solid #dee2e6 !important;
+}
+
+.card table td:last-child,
+.card table th:last-child {
+    border-right: none !important;
+}
+
+/* Quote summary table borders */
+table.table-borderless {
+    border-collapse: collapse;
+}
+
+table.table-borderless td {
+    border-bottom: 1px solid #dee2e6 !important;
+    padding: 0.75rem !important;
+}
+
+table.table-borderless tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Select2 dropdown enhancements */
+.select2-container .select2-selection {
+    border: 2px solid #495057 !important;
+}
+
+.select2-container--open .select2-selection {
+    border-color: #0056b3 !important;
+}
+
+/* Notes card specific */
+.card-header.text-bold {
+    font-weight: 600;
+}
+
+/* History card styling */
+.d-print-none .card {
+    background-color: #ffffff;
+}
