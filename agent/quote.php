@@ -339,7 +339,7 @@ if (isset($_GET['quote_id'])) {
                         <?php echo "$quote_status"; ?>
                     </h5>
                     <div class="table-responsive">
-                        <table class="table table-sm table-borderless">
+                        <table class="table table-sm">
                             <tr>
                                 <th>Quote #:</th>
                                 <td class="text-right"><?php echo "$quote_prefix$quote_number"; ?></td>
@@ -757,7 +757,7 @@ if (isset($_GET['quote_id'])) {
                 <div class="col-sm-3 offset-sm-2">
                     <div class="card">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table class="table table-bordered table-hover mb-0">
                                 <tbody>
                                     <tr>
                                         <td>Product Subtotal:</td>
