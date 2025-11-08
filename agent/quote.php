@@ -927,6 +927,7 @@ require_once "../includes/footer.php";
             var description = row.find('.item-description').val();
             var qty = row.find('.item-qty').val();
             var price = row.find('.item-price').val();
+            var discount = row.find('.item-discount').val() || 0;
             var taxId = row.find('.item-tax').val() || 0;
             var submitBtn = row.find('button[type="submit"]');
 
@@ -936,7 +937,7 @@ require_once "../includes/footer.php";
                 return false;
             }
 
-            console.log('Saving item:', {quote_id: quoteId, item_order: itemOrder, name: itemName, qty: qty, price: price, tax_id: taxId});
+            console.log('Saving item:', {quote_id: quoteId, item_order: itemOrder, name: itemName, qty: qty, price: price, discount: discount, tax_id: taxId});
 
             $.post('post.php', {
                 quote_id: quoteId,
@@ -945,6 +946,7 @@ require_once "../includes/footer.php";
                 description: description,
                 qty: qty,
                 price: price,
+                discount: discount,
                 tax_id: taxId,
                 add_quote_item: true
             }, function(response) {
