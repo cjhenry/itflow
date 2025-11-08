@@ -618,6 +618,9 @@ if (isset($_POST['invoice_note'])) {
 
 if (isset($_POST['edit_item'])) {
 
+    error_log("DEBUG: edit_item POST received");
+    error_log("DEBUG: POST data: " . json_encode($_POST));
+
     enforceUserPermission('module_sales', 2);
 
     $item_id = intval($_POST['item_id']);
@@ -629,6 +632,8 @@ if (isset($_POST['edit_item'])) {
     $tax_id = intval($_POST['tax_id'] ?? 0);
     $product_id = intval($_POST['product_id'] ?? 0);
     $service_id = intval($_POST['service_id'] ?? 0);
+
+    error_log("DEBUG: Parsed values - qty: $qty, price: $price, discount: $discount, tax_id: $tax_id");
 
     $subtotal = $price * $qty;
     $discount_amount = ($discount > 0) ? $subtotal * ($discount / 100) : 0;
@@ -649,12 +654,21 @@ if (isset($_POST['edit_item'])) {
 
     $total = $subtotal_after_discount + $tax_amount;
 
+    error_log("DEBUG: Calculated - subtotal: $subtotal, discount_amount: $discount_amount, subtotal_after_discount: $subtotal_after_discount, tax_amount: $tax_amount, total: $total");
+
     $service_id_sql = $service_id > 0 ? $service_id : "NULL";
-    $update_result = mysqli_query($mysqli,"UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_service_id = $service_id_sql WHERE item_id = $item_id");
+    $update_query = "UPDATE invoice_items SET item_name = '$name', item_description = '$description', item_quantity = $qty, item_price = $price, item_subtotal = $subtotal, item_discount = $discount, item_tax = $tax_amount, item_total = $total, item_tax_id = $tax_id, item_service_id = $service_id_sql WHERE item_id = $item_id";
+    error_log("DEBUG: UPDATE query: " . $update_query);
+
+    $update_result = mysqli_query($mysqli, $update_query);
 
     if (!$update_result) {
-        die("Database Error: " . mysqli_error($mysqli));
+        $error_msg = "Database Error: " . mysqli_error($mysqli);
+        error_log("ERROR: " . $error_msg);
+        die($error_msg);
     }
+
+    error_log("DEBUG: Item updated successfully, item_id: $item_id");
 
     // Determine what type of line item
     $sql = mysqli_query($mysqli,"SELECT item_invoice_id, item_quote_id, item_recurring_invoice_id FROM invoice_items WHERE item_id = $item_id");
